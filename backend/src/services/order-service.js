@@ -217,9 +217,7 @@ class OrderService {
   _extractOrderRefFromAllocationPayload(payload) {
     if (!payload || typeof payload !== 'object') return null;
     return (
-      // ExchangeAllocation (new Propose-Accept pattern)
       payload?.orderId ||
-      // Splice allocation payloads (legacy)
       payload?.settlement?.settlementRef?.id ||
       payload?.allocation?.settlement?.settlementRef?.id ||
       payload?.settlementRef?.id ||
@@ -409,27 +407,13 @@ class OrderService {
     const sdkClient = getCantonSDKClient();
 
     try {
-      // Try new ExchangeAllocation cancel first (operator-only, single-party tx)
-      const exchangeCancelResult = await sdkClient.cancelExchangeAllocation(
-        allocationContractId, executorPartyId, partyId
-      );
-      if (exchangeCancelResult?.cancelled) {
-        console.log(`[OrderService] ✅ ExchangeAllocation cancelled for order ${orderId} — funds released`);
-        return exchangeCancelResult;
-      }
-      if (exchangeCancelResult?.skipped) {
-        console.log(`[OrderService] ⏭️ ExchangeAllocation cancel skipped for order ${orderId}: ${exchangeCancelResult.reason}`);
-        return exchangeCancelResult;
-      }
-
-      // Fallback: try legacy Splice allocation cancel
       const cancelResult = await sdkClient.cancelAllocation(allocationContractId, partyId, executorPartyId);
       if (cancelResult?.cancelled) {
-        console.log(`[OrderService] ✅ Legacy allocation cancelled for order ${orderId} — funds released`);
+        console.log(`[OrderService] Allocation cancelled for order ${orderId} — holdings unlocked`);
       } else if (cancelResult?.skipped) {
-        console.log(`[OrderService] ⏭️ Legacy allocation cancel skipped for order ${orderId}: ${cancelResult.reason}`);
+        console.log(`[OrderService] Allocation cancel skipped for order ${orderId}: ${cancelResult.reason}`);
       } else {
-        console.warn(`[OrderService] ⚠️ Allocation cancel not confirmed for order ${orderId}`);
+        console.warn(`[OrderService] Allocation cancel not confirmed for order ${orderId}`);
       }
       return cancelResult;
     } catch (cancelErr) {
@@ -649,17 +633,14 @@ class OrderService {
     const timestamp = new Date().toISOString();
 
     // ═══════════════════════════════════════════════════════════════════
-    // ALLOCATION STRATEGY: Try real Token Standard allocation first,
-    // fall back to ExchangeAllocation (custom Propose-Accept pattern).
+    // TOKEN STANDARD ALLOCATION (AllocationFactory_Allocate)
     //
-    // Real allocation: Uses Splice/Utilities AllocationFactory_Allocate
-    //   → Creates DvpLegAllocation → tokens locked on-chain → visible in
-    //     CC View / Token Standard explorers after settlement.
+    // Creates a real Splice/Utilities allocation which:
+    //   1. Archives (locks) the user's holdings on-chain
+    //   2. Creates a DvpLegAllocation contract
+    //   3. At match time, Allocation_ExecuteTransfer settles the trade
     //
-    // Exchange allocation (fallback): ExchangeAllocation template with
-    //   signatory=owner only → single-party interactive tx. At match time,
-    //   the operator exercises Execute_Settlement (single-party tx).
-    //   Tokens NOT visible in CC View until real Token Standard integration.
+    // This is MANDATORY — orders cannot be placed without locking tokens.
     // ═══════════════════════════════════════════════════════════════════
 
     const sdkClient = getCantonSDKClient();
@@ -667,47 +648,26 @@ class OrderService {
     let readAs = null;
     let disclosedContracts = [];
     let synchronizerId = null;
-    let allocationType = 'ExchangeAllocation'; // default
+    let allocationType = null;
 
-    // ── ATTEMPT 1: Real Token Standard allocation ──
-    try {
-      const realAlloc = await sdkClient.tryBuildRealAllocationCommand(
-        partyId,
-        operatorPartyId,
-        String(lockInfo.amount),
-        lockInfo.asset,
-        orderId
-      );
+    const realAlloc = await sdkClient.tryBuildRealAllocationCommand(
+      partyId,
+      operatorPartyId,
+      String(lockInfo.amount),
+      lockInfo.asset,
+      orderId
+    );
 
-      if (realAlloc) {
-        allocationCommand = realAlloc.command;
-        readAs = [...new Set([operatorPartyId, partyId, ...(realAlloc.readAs || [])])];
-        disclosedContracts = realAlloc.disclosedContracts || [];
-        synchronizerId = realAlloc.synchronizerId || config.canton.synchronizerId;
-        allocationType = realAlloc.allocationType; // 'UtilitiesAllocation' or 'SpliceAllocation'
-        console.log(`[OrderService] 🎯 Using REAL Token Standard allocation (${allocationType}) for ${orderId}`);
-      }
-    } catch (err) {
-      console.warn(`[OrderService] Real allocation attempt failed, will use ExchangeAllocation: ${err.message}`);
+    if (!realAlloc) {
+      throw new Error(`Cannot place order: failed to create Token Standard allocation for ${lockInfo.amount} ${lockInfo.asset}. Tokens must be locked on-chain before an order can be placed.`);
     }
 
-    // ── ATTEMPT 2: Fall back to ExchangeAllocation ──
-    if (!allocationCommand) {
-      console.log(`[OrderService] Preparing ExchangeAllocation via interactive submission (step 1/2)`);
-      const allocationPrep = sdkClient.buildExchangeAllocationCreateCommand(
-        partyId,
-        operatorPartyId,
-        String(lockInfo.amount),
-        lockInfo.asset,
-        orderType,
-        tradingPair,
-        orderId
-      );
-      allocationCommand = allocationPrep.command;
-      readAs = [...new Set([operatorPartyId, partyId, ...(allocationPrep.readAs || [])])];
-      synchronizerId = allocationPrep.synchronizerId || config.canton.synchronizerId;
-      allocationType = 'ExchangeAllocation';
-    }
+    allocationCommand = realAlloc.command;
+    readAs = [...new Set([operatorPartyId, partyId, ...(realAlloc.readAs || [])])];
+    disclosedContracts = realAlloc.disclosedContracts || [];
+    synchronizerId = realAlloc.synchronizerId || config.canton.synchronizerId;
+    allocationType = realAlloc.allocationType;
+    console.log(`[OrderService] Token Standard allocation (${allocationType}) — tokens locked on-chain for ${orderId}`);
 
     // Store the allocation type with the reservation
     await setAllocationContractIdForOrder(orderId, null, allocationType);
@@ -846,8 +806,7 @@ class OrderService {
           if (!contractId && templateId.includes(':Order:Order')) {
             contractId = created.contractId;
           }
-          // Match both ExchangeAllocation (new) and legacy Allocation contracts
-          if (!allocationContractId && (templateId.includes('ExchangeAllocation') || templateId.includes('Allocation'))) {
+          if (!allocationContractId && templateId.includes('Allocation')) {
             allocationContractId = created.contractId;
           }
         }

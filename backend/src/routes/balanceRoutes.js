@@ -54,9 +54,8 @@ router.get('/:partyId', asyncHandler(async (req, res) => {
       total[sym] = parseFloat(amt) || 0;
     }
 
-    // ─── 2. Trade credits/debits from PostgreSQL (hybrid model) ───
-    // ExchangeAllocation settlement does NOT move Splice token holdings.
-    // We add trade credits and subtract trade debits to get the real balance.
+    // ─── 2. Trade credits/debits from PostgreSQL ───
+    // We add trade credits and subtract trade debits for balance tracking.
     try {
       const tradeAdjustments = await getAllNetTradeBalances(partyId);
       for (const [sym, adj] of Object.entries(tradeAdjustments)) {

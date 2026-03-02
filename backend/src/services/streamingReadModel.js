@@ -82,7 +82,6 @@ class StreamingReadModel extends EventEmitter {
       `${this.packageId}:Order:Order`,
       `${this.packageId}:Settlement:Trade`,
       `${this.packageId}:Settlement:AllocationRecord`,
-      `${this.packageId}:Settlement:ExchangeAllocation`,
     ];
 
     console.log('[StreamingReadModel] 🔌 Starting WebSocket-based streaming...');
@@ -453,7 +452,6 @@ class StreamingReadModel extends EventEmitter {
           'CancelOrder',
           'FillOrder',
           'Operator_Cancel_Settlement',
-          'Execute_Settlement',
           'Allocation_ExecuteTransfer',
         ].includes(choice);
         const isConsuming = consumingFromFlag || consumingByChoiceName;
@@ -582,7 +580,7 @@ class StreamingReadModel extends EventEmitter {
 
   _isAllocationTemplate(templateId) {
     const tid = typeof templateId === 'string' ? templateId : JSON.stringify(templateId);
-    return tid.includes('AllocationRecord') || tid.includes('ExchangeAllocation');
+    return tid.includes('AllocationRecord') || tid.includes('Allocation');
   }
 
   // ─── Order management ─────────────────────────────────────────────────
@@ -704,7 +702,6 @@ class StreamingReadModel extends EventEmitter {
       templateId,
       allocationId: payload.allocationId,
       orderId: payload.orderId,
-      // ExchangeAllocation uses owner/executor; AllocationRecord uses sender/receiver/executor
       sender: payload.sender || payload.owner,
       receiver: payload.receiver,
       executor: payload.executor,
@@ -712,7 +709,6 @@ class StreamingReadModel extends EventEmitter {
       instrument: payload.instrument || payload.instrumentSymbol,
       status: payload.status,
       createdAt: payload.createdAt,
-      // ExchangeAllocation-specific fields
       side: payload.side,
       tradingPair: payload.tradingPair,
     });

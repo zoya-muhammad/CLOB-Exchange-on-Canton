@@ -147,12 +147,12 @@ class ExchangeController {
 
   /**
    * POST /v1/orders
-   * Place a new order using ExchangeAllocation (Propose-Accept) flow.
+   * Place a new order using Token Standard allocation flow.
    *
    * Delegates to OrderService.placeOrder() which:
    * 1. Validates balance via Canton SDK
    * 2. Reserves balance in database
-   * 3. Prepares ExchangeAllocation creation (interactive submission)
+   * 3. Creates Token Standard allocation (AllocationFactory_Allocate) to lock tokens
    *
    * If the user is an external party, returns { requiresSignature: true }
    * so the frontend can sign the prepared transaction. The frontend then
@@ -214,10 +214,9 @@ class ExchangeController {
       throw new LedgerError(ErrorCodes.UNAUTHORIZED, 'Wallet authentication required (walletId, partyId, or x-user-id header)');
     }
 
-    console.log(`[ExchangeAPI] Placing order via ExchangeAllocation flow: ${effectiveSide} ${effectiveQuantity} ${effectivePair} @ ${price || 'MARKET'}`);
+    console.log(`[ExchangeAPI] Placing order: ${effectiveSide} ${effectiveQuantity} ${effectivePair} @ ${price || 'MARKET'}`);
 
     try {
-      // Delegate to OrderService — handles ExchangeAllocation + balance + reservation
       const orderService = getOrderServiceInstance();
       const result = await orderService.placeOrder({
         partyId,

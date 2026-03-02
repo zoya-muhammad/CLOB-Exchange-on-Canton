@@ -1,8 +1,12 @@
 /**
- * Order Book Service — Live Canton Queries
+ * Order Book Service
  *
- * Source of truth: Canton ledger (no in-memory orderbook cache).
- * Every request queries active Order contracts and builds a fresh book.
+ * Primary path: reads from StreamingReadModel (in-memory cache fed by
+ * persistent WebSocket).  Typical response time: < 5 ms.
+ *
+ * Fallback path (cold start only): queries Canton directly via
+ * cantonService.queryActiveContracts — used only while the
+ * StreamingReadModel is still bootstrapping after server restart.
  */
 
 const config = require('../config');
@@ -10,43 +14,92 @@ const tokenProvider = require('./tokenProvider');
 const cantonService = require('./cantonService');
 const { TEMPLATE_IDS } = require('../config/constants');
 const { getTokenSystemType } = require('../config/canton-sdk.config');
+const { getStreamingReadModel } = require('./streamingReadModel');
+
+const SUPPORTED_PAIRS = [
+    'BTC/USDT',
+    'ETH/USDT',
+    'SOL/USDT',
+    'CBTC/USDT',
+    'CC/CBTC',
+];
+
+const MAX_UTILITY_ALLOCATION_AGE_MS = 24 * 60 * 60 * 1000;  // 24 h
+const MAX_SPLICE_ALLOCATION_AGE_MS  = 15 * 60 * 1000;       // 15 min
+
+function isAllocationExpired(order) {
+    const [baseAsset, quoteAsset] = String(order.tradingPair || '').split('/');
+    const side = String(order.orderType || '').toUpperCase();
+    const lockedAsset = side === 'BUY' ? quoteAsset : baseAsset;
+    const lockedAssetType = lockedAsset ? getTokenSystemType(lockedAsset) : null;
+    const maxAgeMs = lockedAssetType === 'splice'
+        ? MAX_SPLICE_ALLOCATION_AGE_MS
+        : MAX_UTILITY_ALLOCATION_AGE_MS;
+    const orderAgeMs = order.timestamp
+        ? (Date.now() - new Date(order.timestamp).getTime())
+        : Infinity;
+    return !Number.isFinite(orderAgeMs) || orderAgeMs > maxAgeMs;
+}
 
 class OrderBookService {
     constructor() {
-        console.log('[OrderBookService] Initialized — live Canton query mode');
+        this._cache = getStreamingReadModel();
+        console.log('[OrderBookService] Initialized — cache-first mode');
     }
 
-    /**
-     * Get order book for a trading pair
-     */
     async getOrderBook(tradingPair, userPartyId = null) {
+        if (this._cache.isReady()) {
+            return this._getOrderBookFromCache(tradingPair, userPartyId);
+        }
+        return this._getOrderBookFromCanton(tradingPair, userPartyId);
+    }
+
+    async getAllOrderBooks() {
+        return Promise.all(
+            SUPPORTED_PAIRS.map(pair => this.getOrderBook(pair))
+        );
+    }
+
+    async getTrades(tradingPair, limit = 50) {
+        if (this._cache.isReady()) {
+            return this._cache.getTradesForPair(tradingPair, limit);
+        }
+        return this._getTradesFromCanton(tradingPair, limit);
+    }
+
+    // ─── Cache path (sub-millisecond) ──────────────────────────────────
+
+    _getOrderBookFromCache(tradingPair, userPartyId = null) {
+        const book = this._cache.getOrderBook(tradingPair);
+
+        book.buyOrders  = book.buyOrders.filter(o => !isAllocationExpired(o));
+        book.sellOrders = book.sellOrders.filter(o => !isAllocationExpired(o));
+        book.source = 'in-memory-cache';
+        if (userPartyId) book.userPartyId = userPartyId;
+
+        return book;
+    }
+
+    // ─── Canton fallback (cold start only) ─────────────────────────────
+
+    async _getOrderBookFromCanton(tradingPair, userPartyId = null) {
         const token = await tokenProvider.getServiceToken();
         const operatorPartyId = config.canton.operatorPartyId;
         if (!operatorPartyId) {
             return this.emptyOrderBook(tradingPair, 'missing-operator-party');
         }
 
-        const templateIds = [
-            TEMPLATE_IDS.orderNew,
-            TEMPLATE_IDS.order,
-        ];
-
         const contracts = await cantonService.queryActiveContracts({
             party: operatorPartyId,
-            templateIds,
+            templateIds: [TEMPLATE_IDS.orderNew, TEMPLATE_IDS.order],
             pageSize: 500,
         }, token);
-
-        const now = Date.now();
-        const MAX_UTILITY_ALLOCATION_AGE_MS = 24 * 60 * 60 * 1000;
-        const MAX_SPLICE_ALLOCATION_AGE_MS = 15 * 60 * 1000;
 
         const openOrders = (Array.isArray(contracts) ? contracts : [])
             .map((c) => {
                 const payload = c.payload || c.createArgument || {};
                 const qty = parseFloat(payload.quantity || '0');
                 const filled = parseFloat(payload.filled || '0');
-                const remaining = qty - filled;
                 const rawPrice = payload.price?.Some ?? payload.price ?? null;
                 return {
                     contractId: c.contractId,
@@ -59,7 +112,7 @@ class OrderBookService {
                     price: rawPrice,
                     quantity: payload.quantity,
                     filled: payload.filled,
-                    remaining,
+                    remaining: qty - filled,
                     timestamp: payload.timestamp,
                 };
             })
@@ -67,21 +120,9 @@ class OrderBookService {
                 o.tradingPair === tradingPair &&
                 o.status === 'OPEN' &&
                 Number.isFinite(o.remaining) &&
-                o.remaining > 0.0000001
-            )
-            .filter((o) => {
-                // Keep orderbook aligned with matcher: exclude orders whose locked allocation
-                // is guaranteed expired and therefore cannot settle.
-                const [baseAsset, quoteAsset] = String(o.tradingPair || '').split('/');
-                const side = String(o.orderType || '').toUpperCase();
-                const lockedAsset = side === 'BUY' ? quoteAsset : baseAsset;
-                const lockedAssetType = lockedAsset ? getTokenSystemType(lockedAsset) : null;
-                const maxAgeMs = lockedAssetType === 'splice'
-                    ? MAX_SPLICE_ALLOCATION_AGE_MS
-                    : MAX_UTILITY_ALLOCATION_AGE_MS;
-                const orderAgeMs = o.timestamp ? (now - new Date(o.timestamp).getTime()) : Infinity;
-                return Number.isFinite(orderAgeMs) && orderAgeMs <= maxAgeMs;
-            });
+                o.remaining > 0.0000001 &&
+                !isAllocationExpired(o)
+            );
 
         const buyOrders = openOrders
             .filter((o) => o.orderType === 'BUY')
@@ -102,56 +143,14 @@ class OrderBookService {
         };
     }
 
-    /**
-     * Return empty order book structure
-     */
-    emptyOrderBook(tradingPair, source = 'empty') {
-            return {
-                tradingPair,
-                buyOrders: [],
-                sellOrders: [],
-                lastPrice: null,
-            timestamp: new Date().toISOString(),
-            source
-        };
-    }
-
-    /**
-     * Get all order books - DIRECTLY from Canton API
-     * Includes Splice Token Standard pairs (CBTC, CC)
-     */
-    async getAllOrderBooks() {
-        // All supported trading pairs - includes Splice Token Standard tokens
-        const pairs = [
-            'BTC/USDT',    // Standard BTC pair
-            'ETH/USDT',    // Standard ETH pair
-            'SOL/USDT',    // Standard SOL pair
-            'CBTC/USDT',   // Canton BTC (Splice Token Standard)
-            'CC/CBTC',     // Canton Coin / Canton BTC
-        ];
-        const orderBooks = [];
-        
-        for (const pair of pairs) {
-            const book = await this.getOrderBook(pair);
-            // Include all pairs, even if empty (so they show in dropdown)
-            orderBooks.push(book);
-        }
-        
-        return orderBooks;
-    }
-
-    async getTrades(tradingPair, limit = 50) {
+    async _getTradesFromCanton(tradingPair, limit = 50) {
         const token = await tokenProvider.getServiceToken();
         const operatorPartyId = config.canton.operatorPartyId;
         if (!operatorPartyId) return [];
 
-        const tradeTemplateIds = [
-            TEMPLATE_IDS.trade,
-            TEMPLATE_IDS.legacyTrade,
-        ];
         const contracts = await cantonService.queryActiveContracts({
             party: operatorPartyId,
-            templateIds: tradeTemplateIds,
+            templateIds: [TEMPLATE_IDS.trade, TEMPLATE_IDS.legacyTrade],
             pageSize: 500,
         }, token);
 
@@ -175,20 +174,25 @@ class OrderBookService {
             .slice(0, limit);
     }
 
-    /**
-     * Create order book - Not needed as orders are created directly
-     * This is a stub for backward compatibility
-     */
+    // ─── Helpers ───────────────────────────────────────────────────────
+
+    emptyOrderBook(tradingPair, source = 'empty') {
+        return {
+            tradingPair,
+            buyOrders: [],
+            sellOrders: [],
+            lastPrice: null,
+            timestamp: new Date().toISOString(),
+            source,
+        };
+    }
+
     async createOrderBook(tradingPair) {
         console.log(`[OrderBookService] Order book creation not needed for ${tradingPair}`);
-            return {
-            contractId: `virtual-${tradingPair}`,
-            alreadyExists: true 
-        };
+        return { contractId: `virtual-${tradingPair}`, alreadyExists: true };
     }
 }
 
-// Singleton
 let instance = null;
 function getOrderBookService() {
     if (!instance) {

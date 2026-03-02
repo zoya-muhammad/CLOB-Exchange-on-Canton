@@ -117,7 +117,7 @@ class OnboardingController {
 
         // ── Store signing key for server-side interactive settlement ──
         // The frontend sends the Ed25519 private key (base64) during onboarding
-        // so the backend can sign ExchangeAllocation creation at order time.
+        // so the backend can sign allocation operations at settlement time.
         const signingKeyBase64 = req.body.signingKeyBase64;
         if (signingKeyBase64 && typeof signingKeyBase64 === 'string' && signingKeyBase64.trim()) {
           await userRegistry.storeSigningKey(result.partyId, signingKeyBase64.trim(), publicKeyFingerprint || '');
@@ -226,8 +226,8 @@ class OnboardingController {
   /**
    * Store signing key for interactive settlement
    * 
-   * This allows the backend to sign ExchangeAllocation creation on behalf
-   * of the external party at order time (interactive submission).
+   * This allows the backend to sign allocation operations on behalf
+   * of the external party during settlement (interactive submission).
    * 
    * Request: { partyId, signingKeyBase64, publicKeyFingerprint }
    * Response: { stored: true }

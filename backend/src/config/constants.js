@@ -63,13 +63,10 @@ const AMULET_PACKAGE_ID = process.env.AMULET_PACKAGE_ID ||
 
 /**
  * Token Standard Package (clob-wolfedge-tokens v2.4.0)
- * Contains: Instrument, Holding, Settlement, Order, OrderV3, ExchangeAllocation
+ * Contains: Instrument, Holding, Settlement, Order, OrderV3
  * 
  * Key feature: Holding contract has custodian-only signatory
  * This allows operator to mint tokens for external parties.
- * 
- * v2.4.0: Added ExchangeAllocation template (Propose-Accept pattern)
- * for external party settlement without co-authorization.
  * 
  * THIS IS THE ONLY PACKAGE ID USED — all old packages are retired.
  */

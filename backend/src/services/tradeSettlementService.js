@@ -1,10 +1,9 @@
 /**
  * Trade Settlement Service — Hybrid Balance Model
  *
- * When a trade is matched, the ExchangeAllocation tracks on-chain
- * authorization but Splice token holdings don't actually move (Canton
- * external-party limitation). This service records the balance effect of
- * every trade so the balance API can return accurate amounts.
+ * When a trade is matched, Allocation_ExecuteTransfer moves tokens on-chain.
+ * This service records the balance effect of every trade so the balance
+ * API can return accurate amounts.
  *
  * Balance formula (applied by the balance API):
  *   available = Splice holdings

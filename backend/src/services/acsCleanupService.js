@@ -20,7 +20,7 @@
  * 
  * IMPORTANT — Package Version:
  *   All contracts now use TOKEN_STANDARD_PACKAGE_ID (v2.4.0 = 0224efbf...).
- *   Archive choices (ArchiveOrder, ArchiveAllocation, ArchiveTrade, Archive_ExchangeAllocation)
+ *   Archive choices (ArchiveOrder, ArchiveAllocation, ArchiveTrade)
  *   are available on this package.
  */
 
@@ -142,49 +142,7 @@ class ACSCleanupService {
       console.warn(`[ACSCleanup] Order scan failed: ${err.message}`);
     }
 
-    // ═══ 2a. Archive EXECUTED and CANCELLED ExchangeAllocations (new Propose-Accept) ═══
-    try {
-      const exchangeAllocs = await cantonService.queryActiveContracts({
-        party: operatorPartyId,
-        templateIds: [`${packageId}:Settlement:ExchangeAllocation`],
-        pageSize: 200,
-      }, token);
-
-      const archivableExchange = (Array.isArray(exchangeAllocs) ? exchangeAllocs : []).filter(c => {
-        const payload = c.payload || c.createArgument || {};
-        return payload.status === 'EXECUTED' || payload.status === 'CANCELLED';
-      });
-
-      if (archivableExchange.length > 0) {
-        const batch = archivableExchange.slice(0, BATCH_SIZE);
-        for (const contract of batch) {
-          try {
-            await cantonService.exerciseChoice({
-              token,
-              actAsParty: [operatorPartyId],
-              templateId: `${packageId}:Settlement:ExchangeAllocation`,
-              contractId: contract.contractId,
-              choice: 'Archive_ExchangeAllocation',
-              choiceArgument: {},
-              readAs: [operatorPartyId],
-            });
-            this.stats.allocationsArchived++;
-            archivedThisCycle++;
-          } catch (err) {
-            if (!err.message?.includes('CONTRACT_NOT_FOUND')) {
-              console.warn(`[ACSCleanup] Failed to archive ExchangeAllocation: ${err.message}`);
-            }
-          }
-        }
-        if (batch.length > 0) {
-          console.log(`[ACSCleanup] Archived ${batch.length} completed ExchangeAllocations (${archivableExchange.length} total eligible)`);
-        }
-      }
-    } catch (err) {
-      console.warn(`[ACSCleanup] ExchangeAllocation scan failed: ${err.message}`);
-    }
-
-    // ═══ 2b. Archive EXECUTED and CANCELLED AllocationRecords ═══
+    // ═══ 2. Archive EXECUTED and CANCELLED AllocationRecords ═══
     try {
       const allocations = await cantonService.queryActiveContracts({
         party: operatorPartyId,

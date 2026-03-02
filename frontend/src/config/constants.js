@@ -33,7 +33,7 @@ export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ||
 
 /**
  * Token Standard Package (clob-wolfedge-tokens v2.4.0)
- * Contains: Instrument, Holding, Settlement, Order, OrderV3, ExchangeAllocation
+ * Contains: Instrument, Holding, Settlement, Order, OrderV3
  * THIS IS THE ONLY PACKAGE ID — all old packages are retired.
  */
 export const TOKEN_STANDARD_PACKAGE_ID = '0224efbf74e4ecb40083f7090a9f12145c607d76da220a91eedc21ca491d24fa';

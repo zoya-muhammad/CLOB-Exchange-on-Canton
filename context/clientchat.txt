@@ -463,6 +463,43 @@ https://docs.sync.global/app_dev/token_standard/index.html
 
 
 
+[11:10 AM, 3/2/2026] +91 79903 24401: Hey @AHMED ,
+The app is creating Allocations on matchmaking but just not executing it (Allocation_ExecuteTransfer), this is the last step remaining which will settle the Allocations (transfer tokens to respective parties).
+[12:47 PM, 3/2/2026] Konain Bhai: @~huz @~Mohak Hello all.
+
+Kindly review it completely and share the complete feedback all together as this will be the final round of it.
+
+Once we have to complete entire feedback we’ll make sure to get it all dome together and completely deliver the project.
+[12:50 PM, 3/2/2026] +91 79903 24401: @AHMED 
+One thing that is still missing is token locking at the time an order is placed. Locking ensures that the tokens are reserved for that specific order. Without this, even if matchmaking occurs, it can lead to inconsistencies, the account balance may or may not have the tokens to transfer…
+[12:50 PM, 3/2/2026] +971 58 590 3850: Hi Zoya, to clarify, we aren’t giving any incremental features or feedback. We have to test everything every time because we are told every time that it’s working and we have to find if it’s actually working and then then it’s always a few things not working or not implemented right. If you can test internally before sharing the version, it puts a bit less effort on us. 
+
+We do appreciate you bringing this close to completion.
+[3:11 PM, 3/2/2026] +91 79903 24401: @AHMED @Konain Bhai 
+As the project is nearly at completion, few remaining items that still need to be addressed:
+
+- During matchmaking, allocations are being created but not executed. The execution step is responsible for transfer of  tokens, and this part is currently missing. 
+- Tokens are not being locked at the time an order is placed, this ensure that when there is matchmaking or settling of orders we are using this reserved tokens to transfer.
+
+Thanks
+[3:13 PM, 3/2/2026] Konain Bhai: @~huz We'll look into this and will get back to you shortly. Moreover, in the meantime if you find something else missing would you be able to let us know by tonight so that we can cater all of that at once. Thanks.
+[3:40 PM, 3/2/2026] +91 79903 24401: For better understanding and context only, the references below show how a similar flow is handled in an existing CLOB (Temple) on Canton.
+We are sharing here just for conceptual clarity, there is no requirement to copy or replicate this exact implementation.
+
+First transaction (order placement):
+https://ccview.io/updates/12206ca53e129973bff08998084e86a946eb3240927b846e526a9d2d717741147264/
+When a user places an order, a Holding contract is created with the exact required amount (35 CC in this case) via a self-transfer, and the Holding contract is then locked.
+
+Second transaction (matchmaking & execution):
+(This transaction is completely submitted by app provider and needs no further signature from any user)
+https://ccview.io/updates/12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0/
+This is a batched transaction, please consider only events 218–237, as the remaining events relate to other orders.
+Here, the previously locked Holding contract is unlocked, and the same is used to create an allocation for the actual receiver (one transferleg for buy and one for sell), and then executed to complete the transfer.
+
+Again, this example is only for understanding the flow, not a mandatory design.
+
+
+
 
 
 
