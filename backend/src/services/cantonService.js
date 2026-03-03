@@ -198,7 +198,18 @@ class CantonService {
             continue;
           }
 
-          console.error(`[CantonService] ❌ Command failed:`, error);
+          const isTransientLockedContract =
+            error.code === 'LOCAL_VERDICT_LOCKED_CONTRACTS' &&
+            (error.context?.definite_answer === 'false' || error.context?.definite_answer === false);
+
+          if (isTransientLockedContract) {
+            // Canton explicitly marks this as an uncertain/transient verdict.
+            // Let higher-level reconciliation logic decide final state without
+            // polluting error logs with expected transient contention.
+            console.warn(`[CantonService] ⚠️ Transient locked-contract verdict (definite_answer=false)`);
+          } else {
+            console.error(`[CantonService] ❌ Command failed:`, error);
+          }
           // Include error CODE in the message so downstream callers (canton-sdk-client,
           // matching-engine) can classify errors by checking error.message.includes(...)
           // without needing to also inspect error.code separately.

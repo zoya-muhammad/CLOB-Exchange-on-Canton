@@ -931,20 +931,16 @@ class OrderService {
         registerOpenOrders([orderRecord]);
       }
       
-      // Only inject if we have a real Canton contract ID.  When the CID is
-      // pending, we rely on the WebSocket stream to deliver the real contract
-      // which emits 'orderCreated' → event-driven matching.
-      const readModel = getReadModelService();
-      if (readModel && hasRealCid) {
-        readModel.addOrder({
-          ...orderRecord,
-          quantity: parseFloat(orderRecord.quantity),
-          filled: 0,
-          operator: operatorPartyId,
-        });
-      }
-      
-      // Broadcast via WebSocket
+      // Do NOT eagerly inject the order into the streaming read model or
+      // trigger matching here. The Canton WebSocket stream will deliver the
+      // confirmed Order contract, which the StreamingReadModel picks up and
+      // emits 'orderCreated'. That event (debounced 3s in app.js) triggers
+      // matching ONLY after Canton has fully committed the Order contract.
+      //
+      // Triggering matching before the Order contract is fully committed
+      // causes LOCKED_CONTRACTS errors because FillOrder races against the
+      // still-propagating CREATE transaction.
+
       if (global.broadcastWebSocket && orderRecord.status === 'OPEN') {
         global.broadcastWebSocket(`orderbook:${orderMeta.tradingPair}`, {
           type: 'NEW_ORDER',
@@ -959,25 +955,6 @@ class OrderService {
           tradingPair: orderMeta.tradingPair,
           timestamp: new Date().toISOString()
         });
-      }
-      
-      // Fast-path matching: if we have a real contract ID, the order is
-      // already in the streaming model via addOrder() above, so trigger now.
-      // Otherwise, the event-driven wiring (app.js) will trigger matching
-      // when the WebSocket delivers the real contract.
-      if (orderRecord.status === 'OPEN' && hasRealCid) {
-        try {
-          const { getMatchingEngine } = require('./matching-engine');
-          const matchingEngine = getMatchingEngine();
-          if (matchingEngine) {
-            console.log(`[OrderService] Triggering matching for ${orderMeta.tradingPair} (fast-path)`);
-            matchingEngine.triggerMatchingCycle(orderMeta.tradingPair).catch(err => {
-              console.warn(`[OrderService] ⚠️ Matching cycle error: ${err.message}`);
-            });
-          }
-        } catch (matchErr) {
-          console.warn('[OrderService] Could not trigger matching:', matchErr.message);
-        }
       }
       
       return {

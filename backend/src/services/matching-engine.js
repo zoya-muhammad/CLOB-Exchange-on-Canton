@@ -10,9 +10,9 @@
  * 3. Sort by price-time priority (FIFO)
  * 4. Find crossing orders (buy price >= sell price)
  * 5. For each match:
- *    a. FillOrder on both Canton contracts (prevents re-matching loop)
+ *    a. Execute seller's Allocation (exchange acts as executor — NO seller key needed)
  *    b. Execute buyer's Allocation (exchange acts as executor — NO buyer key needed)
- *    c. Execute seller's Allocation (exchange acts as executor — NO seller key needed)
+ *    c. FillOrder on both Canton contracts (idempotent reconciliation)
  *    d. Create Trade record on Canton for history
  *    e. Trigger stop-loss checks at the new trade price
  *    f. Broadcast via WebSocket
@@ -688,7 +688,9 @@ class MatchingEngine {
           // that are NOT wrapped in BUYER/SELLER_ALLOCATION_FAILED.
           if (error.message?.includes('already filled') || 
               error.message?.includes('could not be found') ||
-              error.message?.includes('CONTRACT_NOT_FOUND')) {
+              error.message?.includes('CONTRACT_NOT_FOUND') ||
+              error.message?.includes('INACTIVE_CONTRACTS') ||
+              error.message?.includes('LOCKED_CONTRACTS')) {
             // Contract is archived on the ledger — evict from read model permanently
             // AND blacklist the allocation CID to prevent future commands
             const streaming = this._getStreamingModel();
@@ -702,7 +704,7 @@ class MatchingEngine {
             this._markInvalidSettlementOrder(buyOrder, 'CONTRACT_NOT_FOUND — allocation archived');
             this._markInvalidSettlementOrder(sellOrder, 'CONTRACT_NOT_FOUND — allocation archived');
             this.recentlyMatchedOrders.delete(matchKey);
-            if (error.message?.includes('Buy FillOrder failed')) {
+            if (error.message?.includes('FillOrder failed')) {
               break;
             }
             continue;
@@ -921,83 +923,66 @@ class MatchingEngine {
     // ═══════════════════════════════════════════════════════════════════
     // STEP 2: FillOrder on BOTH Canton order contracts AFTER settlement
     //
-    // FillOrder controller = operator. Owner's auth carries from signatory
-    // of the consumed contract (DAML authorization rule).
-    // → OPERATOR-ONLY actAs — no external party co-auth needed.
-    //
-    // Previously used actAsParty: [operatorPartyId, buyOrder.owner] which
-    // caused NO_SYNCHRONIZER_ON_WHICH_ALL_SUBMITTERS_CAN_SUBMIT for external
-    // parties. Fixed: operator submits alone.
+    // Senior/idempotent handling for LOCKED_CONTRACTS:
+    // - Submit FillOrder once
+    // - If Canton returns transient lock/uncertain verdict, reconcile by
+    //   checking whether the order contract is still active on-ledger.
+    // - If archived, treat as already finalized (success path).
+    // - If still active, leave it for next matching cycle instead of blind retries.
     // ═══════════════════════════════════════════════════════════════════
     console.log(`[MatchingEngine] 📝 Step 2: Filling orders on-chain (operator-only submission)...`);
 
-    // Keep a reference to the streaming model for immediate eviction after FillOrder
     const streaming = this._getStreamingModel();
+    const fillOrderWithReconciliation = async (order, side, isPartial, replacementAllocationCid) => {
+      try {
+        await cantonService.exerciseChoice({
+          token,
+          actAsParty: [operatorPartyId],
+          templateId: order.templateId || `${packageId}:Order:Order`,
+          contractId: order.contractId,
+          choice: 'FillOrder',
+          choiceArgument: {
+            fillQuantity: matchQtyStr,
+            newAllocationCid: isPartial && replacementAllocationCid ? replacementAllocationCid : null,
+          },
+          readAs: [operatorPartyId, order.owner],
+        });
+        console.log(`[MatchingEngine] ${side} order filled: ${order.orderId}`);
+        if (streaming) streaming.evictOrder(order.contractId);
+        return;
+      } catch (fillError) {
+        const msg = fillError.message || '';
+        const isTransientLock = msg.includes('LOCKED_CONTRACTS');
+        const isStale = msg.includes('already filled') ||
+          msg.includes('CONTRACT_NOT_FOUND') ||
+          msg.includes('INACTIVE_CONTRACTS');
 
-    try {
-      const buyFillArg = {
-        fillQuantity: matchQtyStr,
-        newAllocationCid: buyIsPartial && replacementBuyAllocationCid
-          ? replacementBuyAllocationCid
-          : null,
-      };
-      await cantonService.exerciseChoice({
-        token,
-        actAsParty: [operatorPartyId],  // OPERATOR ONLY — owner auth from signatory
-        templateId: buyOrder.templateId || `${packageId}:Order:Order`,
-        contractId: buyOrder.contractId,
-        choice: 'FillOrder',
-        choiceArgument: buyFillArg,
-        readAs: [operatorPartyId, buyOrder.owner],
-      });
-      console.log(`[MatchingEngine] ✅ Buy order filled: ${buyOrder.orderId}${buyIsPartial ? ' (partial, remainder alloc: ' + (replacementBuyAllocationCid?.substring(0,20) || 'none') + '...)' : ' (complete)'}`);
+        if (isStale) {
+          console.warn(`[MatchingEngine] ${side} FillOrder skipped (contract stale): ${msg.substring(0, 100)}`);
+          if (streaming) streaming.evictOrder(order.contractId);
+          return;
+        }
 
-      // Immediately evict old contract from streaming model.
-      // FillOrder is a consuming choice — the old contract ID is now archived
-      // on the ledger. The WebSocket ArchivedEvent will also remove it, but
-      // this ensures the order book is updated instantly (belt-and-suspenders).
-      if (streaming) {
-        streaming.evictOrder(buyOrder.contractId);
-      }
-    } catch (fillError) {
-      console.error(`[MatchingEngine] ❌ Buy FillOrder FAILED after settlement: ${fillError.message}`);
-      if (!fillError.message?.includes('already filled') && !fillError.message?.includes('CONTRACT_NOT_FOUND')) {
-        throw new Error(`Post-settlement Buy FillOrder failed: ${fillError.message}`);
-      }
-      // Even on "already filled" / "CONTRACT_NOT_FOUND", evict — it's stale
-      if (streaming) streaming.evictOrder(buyOrder.contractId);
-    }
+        if (isTransientLock) {
+          // Give Canton time to finalize uncertain verdicts, then reconcile with ledger state.
+          await new Promise(r => setTimeout(r, 2000));
+          const stillActive = await cantonService.lookupContract(order.contractId, token);
+          if (!stillActive) {
+            console.warn(`[MatchingEngine] ${side} FillOrder reconciliation: contract already archived on ledger; treating as finalized`);
+            if (streaming) streaming.evictOrder(order.contractId);
+            return;
+          }
 
-    try {
-      const sellFillArg = {
-        fillQuantity: matchQtyStr,
-        newAllocationCid: sellIsPartial && replacementSellAllocationCid
-          ? replacementSellAllocationCid
-          : null,
-      };
-      await cantonService.exerciseChoice({
-        token,
-        actAsParty: [operatorPartyId],  // OPERATOR ONLY — owner auth from signatory
-        templateId: sellOrder.templateId || `${packageId}:Order:Order`,
-        contractId: sellOrder.contractId,
-        choice: 'FillOrder',
-        choiceArgument: sellFillArg,
-        readAs: [operatorPartyId, sellOrder.owner],
-      });
-      console.log(`[MatchingEngine] ✅ Sell order filled: ${sellOrder.orderId}${sellIsPartial ? ' (partial, remainder alloc: ' + (replacementSellAllocationCid?.substring(0,20) || 'none') + '...)' : ' (complete)'}`);
+          console.warn(`[MatchingEngine] ${side} FillOrder deferred: contract still active after transient lock; next cycle will retry`);
+          return;
+        }
 
-      // Immediately evict old contract from streaming model (same as buy above)
-      if (streaming) {
-        streaming.evictOrder(sellOrder.contractId);
+        throw new Error(`${side} FillOrder failed: ${msg}`);
       }
-    } catch (fillError) {
-      console.error(`[MatchingEngine] ❌ Sell FillOrder FAILED after settlement: ${fillError.message}`);
-      if (!fillError.message?.includes('already filled') && !fillError.message?.includes('CONTRACT_NOT_FOUND')) {
-        throw new Error(`Post-settlement Sell FillOrder failed: ${fillError.message}`);
-      }
-      // Even on "already filled" / "CONTRACT_NOT_FOUND", evict — it's stale
-      if (streaming) streaming.evictOrder(sellOrder.contractId);
-    }
+    };
+
+    await fillOrderWithReconciliation(buyOrder, 'Buy', buyIsPartial, replacementBuyAllocationCid);
+    await fillOrderWithReconciliation(sellOrder, 'Sell', sellIsPartial, replacementSellAllocationCid);
 
     // ═══════════════════════════════════════════════════════════════════
     // STEP 2b: Record trade balance effects in PostgreSQL
@@ -1022,8 +1007,8 @@ class MatchingEngine {
           tradingPair,
           buyOrderId: buyOrder.orderId,
           sellOrderId: sellOrder.orderId,
-          sellerUsedRealTransfer,
-          buyerUsedRealTransfer,
+          sellerUsedRealTransfer: true,
+          buyerUsedRealTransfer: true,
         });
       }
     } catch (tsErr) {
