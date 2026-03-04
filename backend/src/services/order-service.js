@@ -669,41 +669,18 @@ class OrderService {
     await setAllocationContractIdForOrder(orderId, null, allocationType);
 
     // ═══════════════════════════════════════════════════════════════════
-    // SINGLE SIGNATURE: Combine allocation + order create into one prepare.
-    // Command 1 (AllocationFactory_Allocate) creates DvpLegAllocation → "#0"
-    // Command 2 (Order Create) references allocationCid: "#0" (relative ref)
+    // Canton does NOT support preparing multiple commands in one
+    // interactive submission. So we prepare the allocation command alone.
+    // After the user signs and executes this, executeOrderPlacement()
+    // prepares the Order Create as step 2. The FRONTEND auto-signs step 2
+    // using the same private key (kept in memory) so the user only enters
+    // their password ONCE.
     // ═══════════════════════════════════════════════════════════════════
-    const orderStatus = orderMode.toUpperCase() === 'STOP_LOSS' ? 'PENDING_TRIGGER' : 'OPEN';
-    const packageId = config.canton.packageIds?.clobExchange;
-    if (!packageId) {
-      throw new Error('CLOB_EXCHANGE_PACKAGE_ID is not configured');
-    }
-
-    const orderCreateCommand = {
-      CreateCommand: {
-        templateId: `${packageId}:Order:Order`,
-        createArguments: {
-          orderId,
-          owner: partyId,
-          orderType: orderType.toUpperCase(),
-          orderMode: orderMode.toUpperCase(),
-          tradingPair,
-          price: orderMode.toUpperCase() === 'LIMIT' && price ? String(price) : null,
-          quantity: String(quantity),
-          filled: '0.0',
-          status: orderStatus,
-          timestamp: new Date().toISOString(),
-          operator: operatorPartyId,
-          allocationCid: '#0', // Reference allocation created by first command in same transaction
-          stopPrice: stopPrice || null,
-        },
-      },
-    };
 
     const prepareResult = await cantonService.prepareInteractiveSubmission({
       token,
       actAsParty: [partyId],
-      commands: [allocationCommand, orderCreateCommand],
+      commands: [allocationCommand],
       readAs,
       synchronizerId,
       disclosedContracts,
@@ -713,11 +690,11 @@ class OrderService {
       throw new Error('Prepare returned incomplete result: missing preparedTransaction or preparedTransactionHash');
     }
     
-    console.log(`[OrderService] ✅ Allocation + Order combined (single sign, type: ${allocationType}). Hash to sign: ${prepareResult.preparedTransactionHash.substring(0, 40)}...`);
+    console.log(`[OrderService] ✅ Allocation prepared (type: ${allocationType}). Hash to sign: ${prepareResult.preparedTransactionHash.substring(0, 40)}...`);
     
     return {
       requiresSignature: true,
-      step: 'ALLOCATION_AND_ORDER_PREPARED',
+      step: 'ALLOCATION_PREPARED',
       orderId,
       tradingPair,
       orderType: orderType.toUpperCase(),
@@ -730,7 +707,7 @@ class OrderService {
       hashingSchemeVersion: prepareResult.hashingSchemeVersion,
       partyId,
       lockInfo,
-      stage: 'ALLOCATION_AND_ORDER_PREPARED',
+      stage: 'ALLOCATION_PREPARED',
       allocationType,
     };
   }

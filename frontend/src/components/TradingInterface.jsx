@@ -507,20 +507,21 @@ export default function TradingInterface({ partyId }) {
         });
 
         if (response?.data?.requiresSignature) {
-          // Participant requires sequential interactive submissions for external parties:
-          // sign allocation first, then sign order create.
-          setSigningState((prev) => ({
-            ...prev,
-            action: 'PLACE',
+          // Step 2: Order Create prepared — auto-sign with the same private key
+          // (still in memory) so the user does NOT need to enter password again.
+          console.log('[SignOrder] Step 1 done. Auto-signing step 2 (order create)...');
+          const sig2 = await signMessage(privateKey, response.data.preparedTransactionHash);
+          const response2 = await apiClient.post('/orders/execute-place', {
             preparedTransaction: response.data.preparedTransaction,
-            preparedTransactionHash: response.data.preparedTransactionHash,
+            partyId,
+            signatureBase64: sig2,
+            signedBy,
             hashingSchemeVersion: response.data.hashingSchemeVersion,
-            orderMeta: response.data.orderMeta || prev?.orderMeta,
-          }));
-          setWalletPassword('');
-          toast.success('Step 1 complete. Please sign once more to finalize order.');
-          setOrderPlacing(false);
-          return;
+            orderMeta: response.data.orderMeta || signingState.orderMeta,
+            signingKeyBase64: privateKeyBase64,
+          });
+          // Use the second response as the final response
+          response = response2;
         }
 
         if (response.success) {

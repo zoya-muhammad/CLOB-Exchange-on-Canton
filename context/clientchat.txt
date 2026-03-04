@@ -1013,3 +1013,14 @@ Comments
 © Copyright 2026, Digital Asset.
 
 Built with Sphinx using a theme provided by Read the Docs.
+
+
+
+
+[10:39 AM, 3/4/2026] +91 79903 24401: @AHMED
+Allocations are still not being executed, it is just created.
+[10:40 AM, 3/4/2026] +91 79903 24401: @AHMED
+Allocations are still not being executed, it is just created.
+Tested this with emptied cache and a new wallet
+[10:48 AM, 3/4/2026] +91 79903 24401: Also, when creating an order, users currently have to sign twice to place an order. This adds unnecessary friction, need to combine both transactions into a single.
+[10:51 AM, 3/4/2026] +91 79903 24401: And tokens are still not being locked while placing an order
