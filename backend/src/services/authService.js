@@ -46,7 +46,7 @@ class AuthService {
     await db.authChallenge.create({
       data: {
         nonce,
-        walletId,
+      walletId,
         expiresAt: new Date(expiresAt),
       },
     });
@@ -115,7 +115,7 @@ class AuthService {
       await db.session.create({
         data: {
           id: sessionId,
-          walletId,
+        walletId,
           expiresAt: new Date(expiresAt),
         },
       });
