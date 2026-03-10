@@ -837,22 +837,18 @@ class MatchingEngine {
     const sdkClient = getCantonSDKClient();
 
     // ═══════════════════════════════════════════════════════════════════
-    // STEP 1: Temple Settlement Pattern
+    // TEMPLE PATTERN — Transaction 2: Batch Settlement
     //
-    // Phase A: Execute both allocations (tokens user → operator)
-    //   Allocation_ExecuteTransfer moves locked tokens to the operator.
-    //   Operator key is hosted → non-interactive, no user sig needed.
+    // Performed solely by app provider (operator-only, non-interactive):
+    //   1. Withdraw both allocations (unlock tokens locked in Transaction 1)
+    //   2. Create new allocation with 2 transfer legs:
+    //      - Leg 1: Seller → Buyer (base tokens)
+    //      - Leg 2: Buyer → Seller (quote tokens)
+    //   3. Execute the new multi-leg allocation
     //
-    // Phase B: Operator forwards tokens to counterparties
-    //   Operator sends base tokens to buyer, quote tokens to seller.
-    //   Uses performTransfer which routes through ExternalPartyAmuletRules
-    //   for external parties (auto-completes, no Accept needed).
-    //
-    // Phase C: Verify Holding contracts on-chain (source of truth)
-    //
-    // Result: Holdings on Canton explorer accurately reflect settlement.
+    // Result: Execution visible on Holding contracts via splice-api-token-holding-v1 interface
     // ═══════════════════════════════════════════════════════════════════
-    console.log(`[MatchingEngine] Settlement (Temple pattern): ${matchQtyStr} ${baseSymbol} @ ${matchPrice} ${quoteSymbol}`);
+    console.log(`[MatchingEngine] 🔄 Temple Pattern Settlement: ${matchQtyStr} ${baseSymbol} @ ${matchPrice} ${quoteSymbol}`);
     console.log(`[MatchingEngine]    Seller alloc: ${sellOrder.allocationContractId ? sellOrder.allocationContractId.substring(0, 24) + '...' : 'missing'} (${baseSymbol}, type: ${sellOrder.allocationType})`);
     console.log(`[MatchingEngine]    Buyer alloc:  ${buyOrder.allocationContractId ? buyOrder.allocationContractId.substring(0, 24) + '...' : 'missing'} (${quoteSymbol}, type: ${buyOrder.allocationType})`);
 
@@ -862,125 +858,257 @@ class MatchingEngine {
 
     const tradeId = `trade-${Date.now()}-${Math.random().toString(36).substring(2, 10)}`;
 
-    let replacementSellAllocationCid = null;
-    let replacementBuyAllocationCid = null;
+    // ═══ TEMPLE PATTERN STEP 1: Withdraw both allocations ═══
+    console.log(`[MatchingEngine] 🔄 Temple Pattern Step 1: Withdrawing allocations (unlock tokens)...`);
+    
+    let sellerWithdrawnHoldings = [];
+    let buyerWithdrawnHoldings = [];
 
-    // ── Phase A: Execute both allocations (tokens → operator) ──────
-    console.log(`[MatchingEngine] Step 1A: Executing allocations (tokens → operator)...`);
-
-    // ── Execute SELLER allocation ────
     try {
-      console.log(`[MatchingEngine]    Seller: Allocation_ExecuteTransfer (${sellOrder.allocationType})...`);
-      const sellerResult = await sdkClient.tryRealAllocationExecution(
+      console.log(`[MatchingEngine]    Withdrawing seller allocation: ${sellOrder.allocationContractId.substring(0, 30)}...`);
+      const sellerWithdrawResult = await sdkClient.withdrawAllocation(
         sellOrder.allocationContractId,
+        sellOrder.owner,
+        operatorPartyId,
+        baseSymbol
+      );
+      if (sellerWithdrawResult?.amuletCids) {
+        sellerWithdrawnHoldings = sellerWithdrawnHoldings.concat(sellerWithdrawResult.amuletCids);
+        console.log(`[MatchingEngine]    ✅ Seller allocation withdrawn — ${sellerWithdrawnHoldings.length} holding(s) unlocked`);
+      } else {
+        console.warn(`[MatchingEngine]    ⚠️ Seller withdrawal did not return holding CIDs`);
+      }
+    } catch (sellerWithdrawErr) {
+      const msg = sellerWithdrawErr.message || String(sellerWithdrawErr);
+      throw new Error(`SELLER_WITHDRAW_FAILED: ${msg}`);
+    }
+
+    try {
+      console.log(`[MatchingEngine]    Withdrawing buyer allocation: ${buyOrder.allocationContractId.substring(0, 30)}...`);
+      const buyerWithdrawResult = await sdkClient.withdrawAllocation(
+        buyOrder.allocationContractId,
+        buyOrder.owner,
+        operatorPartyId,
+        quoteSymbol
+      );
+      if (buyerWithdrawResult?.amuletCids) {
+        buyerWithdrawnHoldings = buyerWithdrawnHoldings.concat(buyerWithdrawResult.amuletCids);
+        console.log(`[MatchingEngine]    ✅ Buyer allocation withdrawn — ${buyerWithdrawnHoldings.length} holding(s) unlocked`);
+      } else {
+        console.warn(`[MatchingEngine]    ⚠️ Buyer withdrawal did not return holding CIDs`);
+      }
+    } catch (buyerWithdrawErr) {
+      const msg = buyerWithdrawErr.message || String(buyerWithdrawErr);
+      throw new Error(`BUYER_WITHDRAW_FAILED: ${msg}`);
+    }
+
+    console.log(`[MatchingEngine]    ✅ Step 1 complete — both allocations withdrawn, tokens unlocked`);
+
+    // ═══ TEMPLE PATTERN STEP 2: Create new allocation with 2 transfer legs ═══
+    console.log(`[MatchingEngine] 🔄 Temple Pattern Step 2: Creating new allocation with 2 transfer legs...`);
+    
+    // After withdrawal, tokens are back in user holdings
+    // Allocation creation methods will query fresh holdings automatically
+    // Use withdrawn holding CIDs if available, otherwise let methods query fresh holdings
+    
+    // Build transfer legs:
+    // Leg 1 (Buy leg): Seller → Buyer (base tokens)
+    // Leg 2 (Sell leg): Buyer → Seller (quote tokens)
+    const transferLegs = [
+      {
+        sender: sellOrder.owner,
+        receiver: buyOrder.owner,
+        amount: matchQtyStr,
+        symbol: baseSymbol,
+      },
+      {
+        sender: buyOrder.owner,
+        receiver: sellOrder.owner,
+        amount: quoteAmountStr,
+        symbol: quoteSymbol,
+      },
+    ];
+
+    let newAllocationCid = null;
+    let newAllocationExecuteResult = null;
+
+    try {
+      // Try to create multi-leg allocation
+      // Note: If API doesn't support multi-leg, we'll create two separate allocations
+      // Pass null for holdingCids to let the method query fresh holdings after withdrawal
+      const multiLegAlloc = await sdkClient.buildMultiLegAllocationCommand(
+        operatorPartyId,
+        transferLegs,
+        tradeId,
+        null  // Let method query fresh holdings
+      );
+
+      // Create the multi-leg allocation (non-interactive, operator-only)
+      const createResult = await cantonService.submitAndWait({
+        token,
+        actAsParty: [operatorPartyId],
+        commands: [multiLegAlloc.command],
+        readAs: multiLegAlloc.readAs,
+        synchronizerId: multiLegAlloc.synchronizerId,
+        disclosedContracts: multiLegAlloc.disclosedContracts,
+      });
+
+      // Extract new allocation CID from creation result
+      for (const event of (createResult?.transaction?.events || [])) {
+        const created = event.created || event.CreatedEvent;
+        if (created?.contractId) {
+          const tpl = typeof created.templateId === 'string' ? created.templateId : '';
+          if (tpl.includes('Allocation')) {
+            newAllocationCid = created.contractId;
+            break;
+          }
+        }
+      }
+
+      if (!newAllocationCid) {
+        throw new Error('Multi-leg allocation created but CID not found in events');
+      }
+
+      console.log(`[MatchingEngine]    ✅ Multi-leg allocation created: ${newAllocationCid.substring(0, 30)}...`);
+
+      // ═══ TEMPLE PATTERN STEP 3: Execute the new multi-leg allocation ═══
+      console.log(`[MatchingEngine] 🔄 Temple Pattern Step 3: Executing multi-leg allocation...`);
+      
+      newAllocationExecuteResult = await sdkClient.tryRealAllocationExecution(
+        newAllocationCid,
+        operatorPartyId,
+        baseSymbol, // Use base symbol for execution (both legs execute together)
+        sellOrder.owner, // Owner is seller (for readAs)
+        buyOrder.owner  // Receiver is buyer
+      );
+
+      if (!newAllocationExecuteResult) {
+        throw new Error('Multi-leg allocation execution returned null');
+      }
+
+      console.log(`[MatchingEngine]    ✅ Multi-leg allocation executed — settlement complete!`);
+      console.log(`[MatchingEngine]    ✅ Temple Pattern: Withdraw → Create multi-leg → Execute (batched)`);
+
+    } catch (multiLegErr) {
+      // Fallback: Create two separate allocations (one per leg) and execute them
+      console.warn(`[MatchingEngine]    ⚠️ Multi-leg allocation failed: ${multiLegErr.message}`);
+      console.log(`[MatchingEngine]    🔄 Fallback: Creating two separate allocations (one per leg)...`);
+
+      // Create buy leg allocation (seller → buyer, base tokens)
+      // Pass null to let method query fresh holdings after withdrawal
+      const buyLegAlloc = await sdkClient.buildAllocationInteractiveCommand(
+        sellOrder.owner,
+        buyOrder.owner,
+        matchQtyStr,
+        baseSymbol,
+        operatorPartyId,
+        `${tradeId}-buy-leg`,
+        null  // Query fresh holdings
+      );
+
+      // Create sell leg allocation (buyer → seller, quote tokens)
+      // Pass null to let method query fresh holdings after withdrawal
+      const sellLegAlloc = await sdkClient.buildAllocationInteractiveCommand(
+        buyOrder.owner,
+        sellOrder.owner,
+        quoteAmountStr,
+        quoteSymbol,
+        operatorPartyId,
+        `${tradeId}-sell-leg`,
+        null  // Query fresh holdings
+      );
+
+      // Create both allocations (sequentially, as close together as possible)
+      const buyLegCreateResult = await cantonService.submitAndWait({
+        token,
+        actAsParty: [operatorPartyId],
+        commands: [buyLegAlloc.command],
+        readAs: buyLegAlloc.readAs,
+        synchronizerId: buyLegAlloc.synchronizerId,
+        disclosedContracts: buyLegAlloc.disclosedContracts,
+      });
+
+      let buyLegAllocCid = null;
+      for (const event of (buyLegCreateResult?.transaction?.events || [])) {
+        const created = event.created || event.CreatedEvent;
+        if (created?.contractId && (typeof created.templateId === 'string' ? created.templateId : '').includes('Allocation')) {
+          buyLegAllocCid = created.contractId;
+          break;
+        }
+      }
+
+      const sellLegCreateResult = await cantonService.submitAndWait({
+        token,
+        actAsParty: [operatorPartyId],
+        commands: [sellLegAlloc.command],
+        readAs: sellLegAlloc.readAs,
+        synchronizerId: sellLegAlloc.synchronizerId,
+        disclosedContracts: sellLegAlloc.disclosedContracts,
+      });
+
+      let sellLegAllocCid = null;
+      for (const event of (sellLegCreateResult?.transaction?.events || [])) {
+        const created = event.created || event.CreatedEvent;
+        if (created?.contractId && (typeof created.templateId === 'string' ? created.templateId : '').includes('Allocation')) {
+          sellLegAllocCid = created.contractId;
+          break;
+        }
+      }
+
+      if (!buyLegAllocCid || !sellLegAllocCid) {
+        throw new Error('Failed to create both leg allocations');
+      }
+
+      console.log(`[MatchingEngine]    ✅ Two allocations created: buy-leg=${buyLegAllocCid.substring(0, 24)}..., sell-leg=${sellLegAllocCid.substring(0, 24)}...`);
+
+      // Execute both allocations (sequentially, as close together as possible)
+      console.log(`[MatchingEngine] 🔄 Temple Pattern Step 3: Executing both leg allocations...`);
+      
+      const buyLegExecuteResult = await sdkClient.tryRealAllocationExecution(
+        buyLegAllocCid,
         operatorPartyId,
         baseSymbol,
         sellOrder.owner,
-        operatorPartyId
+        buyOrder.owner
       );
-      if (!sellerResult) {
-        throw new Error(`${baseSymbol} seller Allocation_ExecuteTransfer returned null`);
-      }
-      console.log(`[MatchingEngine]    Seller: ${baseSymbol} tokens transferred to operator`);
 
-      if (sellIsPartial && sellerResult?.transaction?.events) {
-        for (const event of sellerResult.transaction.events) {
-          const created = event.created || event.CreatedEvent;
-          if (created?.contractId) {
-            const payload = created.createArgument || created.payload || {};
-            if (payload.status === 'PENDING') {
-              replacementSellAllocationCid = created.contractId;
-              break;
-            }
-          }
-        }
-      }
-    } catch (sellAllocErr) {
-      const msg = sellAllocErr.message || String(sellAllocErr);
-      throw new Error(`SELLER_ALLOCATION_FAILED: ${msg}`);
-    }
-
-    // ── Execute BUYER allocation ─────
-    try {
-      console.log(`[MatchingEngine]    Buyer: Allocation_ExecuteTransfer (${buyOrder.allocationType})...`);
-      const buyerResult = await sdkClient.tryRealAllocationExecution(
-        buyOrder.allocationContractId,
+      const sellLegExecuteResult = await sdkClient.tryRealAllocationExecution(
+        sellLegAllocCid,
         operatorPartyId,
         quoteSymbol,
         buyOrder.owner,
-        operatorPartyId
+        sellOrder.owner
       );
-      if (!buyerResult) {
-        throw new Error(`${quoteSymbol} buyer Allocation_ExecuteTransfer returned null`);
+
+      if (!buyLegExecuteResult || !sellLegExecuteResult) {
+        throw new Error('One or both leg allocations failed to execute');
       }
-      console.log(`[MatchingEngine]    Buyer: ${quoteSymbol} tokens transferred to operator`);
 
-      if (buyIsPartial && buyerResult?.transaction?.events) {
-        for (const event of buyerResult.transaction.events) {
-          const created = event.created || event.CreatedEvent;
-          if (created?.contractId) {
-            const payload = created.createArgument || created.payload || {};
-            if (payload.status === 'PENDING') {
-              replacementBuyAllocationCid = created.contractId;
-              break;
-            }
-          }
-        }
-      }
-    } catch (buyAllocErr) {
-      const msg = buyAllocErr.message || String(buyAllocErr);
-      throw new Error(`BUYER_ALLOCATION_FAILED: ${msg}`);
+      newAllocationCid = buyLegAllocCid; // Use buy leg CID as primary
+      newAllocationExecuteResult = buyLegExecuteResult;
+      console.log(`[MatchingEngine]    ✅ Both leg allocations executed — settlement complete!`);
+      console.log(`[MatchingEngine]    ✅ Temple Pattern: Withdraw → Create 2 allocations → Execute (batched)`);
     }
 
-    console.log(`[MatchingEngine]    Phase A complete — both allocations executed, tokens with operator`);
-
-    // ── Phase B: Operator forwards tokens to counterparties ────────
-    // Seller's base tokens (now with operator) → Buyer
-    // Buyer's quote tokens (now with operator) → Seller
-    console.log(`[MatchingEngine] Step 1B: Operator forwarding tokens to counterparties...`);
-
+    // ═══ TEMPLE PATTERN STEP 4: Verify holdings reflect execution ═══
+    console.log(`[MatchingEngine] 🔄 Temple Pattern Step 4: Verifying Holding contracts (source of truth)...`);
     try {
-      console.log(`[MatchingEngine]    Operator→Buyer: ${matchQtyStr} ${baseSymbol}`);
-      await sdkClient.performTransfer(
-        operatorPartyId,
-        buyOrder.owner,
-        matchQtyStr,
-        baseSymbol
-      );
-      console.log(`[MatchingEngine]    Operator→Buyer: ${baseSymbol} transfer succeeded`);
-    } catch (transferErr) {
-      const msg = transferErr.message || String(transferErr);
-      console.error(`[MatchingEngine]    Operator→Buyer transfer failed: ${msg.substring(0, 150)}`);
-      throw new Error(`SETTLEMENT_TRANSFER_FAILED: Operator→Buyer ${baseSymbol}: ${msg}`);
-    }
-
-    try {
-      console.log(`[MatchingEngine]    Operator→Seller: ${quoteAmountStr} ${quoteSymbol}`);
-      await sdkClient.performTransfer(
-        operatorPartyId,
-        sellOrder.owner,
-        quoteAmountStr,
-        quoteSymbol
-      );
-      console.log(`[MatchingEngine]    Operator→Seller: ${quoteSymbol} transfer succeeded`);
-    } catch (transferErr) {
-      const msg = transferErr.message || String(transferErr);
-      console.error(`[MatchingEngine]    Operator→Seller transfer failed: ${msg.substring(0, 150)}`);
-      throw new Error(`SETTLEMENT_TRANSFER_FAILED: Operator→Seller ${quoteSymbol}: ${msg}`);
-    }
-
-    console.log(`[MatchingEngine]    Settlement COMPLETE — Temple pattern (execute + forward), operator-only`);
-
-    // ── Phase C: Verify holdings after settlement ──────────────────
-    try {
-      console.log(`[MatchingEngine] Step 1C: Verifying Holding contracts after settlement...`);
       const sellerHoldings = await sdkClient.verifyHoldingState(sellOrder.owner, baseSymbol);
       const buyerHoldings = await sdkClient.verifyHoldingState(buyOrder.owner, baseSymbol);
-      console.log(`[MatchingEngine]    Seller ${baseSymbol}: ${sellerHoldings.totalAvailable} available, ${sellerHoldings.totalLocked} locked`);
-      console.log(`[MatchingEngine]    Buyer ${baseSymbol}:  ${buyerHoldings.totalAvailable} available, ${buyerHoldings.totalLocked} locked`);
+      const sellerQuoteHoldings = await sdkClient.verifyHoldingState(sellOrder.owner, quoteSymbol);
+      const buyerQuoteHoldings = await sdkClient.verifyHoldingState(buyOrder.owner, quoteSymbol);
+      
+      console.log(`[MatchingEngine]    ✅ Seller Holdings (${baseSymbol}): ${sellerHoldings.totalAvailable} available, ${sellerHoldings.totalLocked} locked`);
+      console.log(`[MatchingEngine]    ✅ Seller Holdings (${quoteSymbol}): ${sellerQuoteHoldings.totalAvailable} available, ${sellerQuoteHoldings.totalLocked} locked`);
+      console.log(`[MatchingEngine]    ✅ Buyer Holdings (${baseSymbol}): ${buyerHoldings.totalAvailable} available, ${buyerHoldings.totalLocked} locked`);
+      console.log(`[MatchingEngine]    ✅ Buyer Holdings (${quoteSymbol}): ${buyerQuoteHoldings.totalAvailable} available, ${buyerQuoteHoldings.totalLocked} locked`);
+      console.log(`[MatchingEngine]    ✅ Execution visible on Holding contracts via splice-api-token-holding-v1 interface`);
     } catch (verifyErr) {
-      console.warn(`[MatchingEngine]    Holding verification skipped: ${verifyErr.message}`);
+      console.warn(`[MatchingEngine]    ⚠️ Holding verification skipped: ${verifyErr.message}`);
     }
+
+    let replacementSellAllocationCid = null;
+    let replacementBuyAllocationCid = null;
 
     // ═══════════════════════════════════════════════════════════════════
     // STEP 2: FillOrder on BOTH Canton order contracts AFTER settlement

@@ -629,14 +629,16 @@ class OrderService {
     const timestamp = new Date().toISOString();
 
     // ═══════════════════════════════════════════════════════════════════
-    // TOKEN STANDARD ALLOCATION (AllocationFactory_Allocate)
+    // TEMPLE PATTERN — Transaction 1: Self-transfer + Self-allocation
     //
-    // Creates a real Splice/Utilities allocation which:
-    //   1. Archives (locks) the user's holdings on-chain
-    //   2. Creates a DvpLegAllocation contract
-    //   3. At match time, Allocation_ExecuteTransfer settles the trade
+    // Step 1: Self-transfer to create exact-amount holding
+    // Step 2: Self-allocation (sender = receiver = user, NOT executed)
+    // Purpose: Lock/reserve tokens for future settlement
     //
-    // This is MANDATORY — orders cannot be placed without locking tokens.
+    // Settlement (Transaction 2) will:
+    //   - Withdraw allocations
+    //   - Create new multi-leg allocation (2 transfer legs)
+    //   - Execute the new allocation
     // ═══════════════════════════════════════════════════════════════════
 
     const sdkClient = getCantonSDKClient();
@@ -645,13 +647,26 @@ class OrderService {
     let disclosedContracts = [];
     let synchronizerId = null;
     let allocationType = null;
+    let exactAmountHoldingCid = null;
 
+    // ═══ TEMPLE PATTERN STEP 1: Self-transfer for exact-amount holding ═══
+    // NOTE: Self-transfer must be interactive for external parties.
+    // However, Canton doesn't support multiple commands in one interactive submission.
+    // So we skip self-transfer for now and use existing holdings.
+    // The exact-amount requirement is an optimization; existing holdings work fine.
+    console.log(`[OrderService] 🔄 Temple Pattern: Using existing holdings (self-transfer skipped due to Canton limitation)`);
+    console.log(`[OrderService]    Note: Self-transfer requires interactive signature but cannot be combined with allocation`);
+    console.log(`[OrderService]    Using existing holdings for allocation (exact-amount optimization skipped)`);
+
+    // ═══ TEMPLE PATTERN STEP 2: Self-allocation (sender = receiver = user) ═══
+    console.log(`[OrderService] 🔄 Temple Pattern Step 2: Creating self-allocation (NOT executed)...`);
     const realAlloc = await sdkClient.tryBuildRealAllocationCommand(
       partyId,
       operatorPartyId,
       String(lockInfo.amount),
       lockInfo.asset,
-      orderId
+      orderId,
+      null  // Use existing holdings (self-transfer skipped)
     );
 
     if (!realAlloc) {
@@ -663,7 +678,7 @@ class OrderService {
     disclosedContracts = realAlloc.disclosedContracts || [];
     synchronizerId = realAlloc.synchronizerId || config.canton.synchronizerId;
     allocationType = realAlloc.allocationType;
-    console.log(`[OrderService] Allocation (${allocationType}) — tokens locked on-chain for ${orderId} (receiver=operator, settlement via execute+forward)`);
+    console.log(`[OrderService] ✅ Temple Pattern: Self-allocation prepared (sender = receiver = user, NOT executed) for ${orderId}`);
 
     // Store the allocation type with the reservation
     await setAllocationContractIdForOrder(orderId, null, allocationType);

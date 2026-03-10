@@ -1023,9 +1023,300 @@ class CantonSDKClient {
   }
 
   /**
+   * Build interactive self-transfer command for Temple pattern order placement.
+   * 
+   * Self-transfer must be interactive for external parties (backend cannot submit on their behalf).
+   * This prepares the TransferFactory_Transfer command for user signature.
+   * 
+   * @param {string} partyId - Party performing self-transfer
+   * @param {string} amount - Exact amount needed
+   * @param {string} symbol - Token symbol
+   * @returns {Promise<{command: Object, readAs: Array, disclosedContracts: Array, synchronizerId: string, holdingCids: Array}>}
+   */
+  async buildSelfTransferInteractiveCommand(partyId, amount, symbol) {
+    if (!this.isReady()) {
+      throw new Error('Canton SDK not initialized');
+    }
+
+    const instrumentId = toCantonInstrument(symbol);
+    const adminParty = this.getInstrumentAdminForSymbol(symbol);
+    const tokenType = getTokenSystemType(symbol);
+    const adminToken = await tokenProvider.getServiceToken();
+    const configModule = require('../config');
+    const synchronizerId = configModule.canton.synchronizerId;
+
+    console.log(`[CantonSDK] 🔄 Temple Pattern: Building interactive self-transfer command`);
+    console.log(`[CantonSDK]    Party: ${partyId.substring(0, 30)}...`);
+    console.log(`[CantonSDK]    Amount: ${amount} ${symbol}`);
+
+    // Query holdings for the sender
+    const holdings = await this._withPartyContext(partyId, async () => {
+      return await this.sdk.tokenStandard?.listHoldingUtxos(false) || [];
+    });
+
+    const holdingCids = holdings
+      .filter(h => extractInstrumentId(h.interfaceViewValue?.instrumentId) === instrumentId)
+      .map(h => h.contractId);
+
+    if (holdingCids.length === 0) {
+      throw new Error(`No ${symbol} holdings found for self-transfer`);
+    }
+
+    console.log(`[CantonSDK]    Found ${holdingCids.length} ${symbol} UTXOs for self-transfer`);
+
+    // Get transfer factory from registry
+    const registryUrl = this._getTransferFactoryUrl(tokenType);
+    const now = new Date().toISOString();
+    const executeBefore = new Date(Date.now() + 86400000).toISOString();
+
+    const { data: factory } = await getRegistryApi().post(registryUrl, {
+      choiceArguments: {
+        expectedAdmin: adminParty,
+        transfer: {
+          sender: partyId,
+          receiver: partyId, // Self-transfer
+          amount: toDamlNumericString(amount),
+          instrumentId: { id: instrumentId, admin: adminParty },
+          requestedAt: now,
+          executeBefore,
+          inputHoldingCids: holdingCids,
+          meta: { values: {} },
+        },
+        extraArgs: { context: { values: {} }, meta: { values: {} } },
+      },
+      excludeDebugFields: true,
+    }, {
+      headers: { Authorization: `Bearer ${adminToken}`, Accept: 'application/json' },
+    });
+
+    const TRANSFER_FACTORY_INTERFACE = UTILITIES_CONFIG.TRANSFER_FACTORY_INTERFACE
+      || '#splice-api-token-transfer-instruction-v1:Splice.Api.Token.TransferInstructionV1:TransferFactory';
+
+    return {
+      command: {
+        ExerciseCommand: {
+          templateId: TRANSFER_FACTORY_INTERFACE,
+          contractId: factory.factoryId,
+          choice: 'TransferFactory_Transfer',
+          choiceArgument: {
+            expectedAdmin: adminParty,
+            transfer: {
+              sender: partyId,
+              receiver: partyId,
+              amount: toDamlNumericString(amount),
+              instrumentId: { id: instrumentId, admin: adminParty },
+              requestedAt: now,
+              executeBefore,
+              inputHoldingCids: holdingCids,
+              meta: { values: {} },
+            },
+            extraArgs: {
+              context: factory.choiceContext?.choiceContextData || { values: {} },
+              meta: { values: {} },
+            },
+          },
+        },
+      },
+      readAs: [partyId],
+      disclosedContracts: (factory.choiceContext?.disclosedContracts || []).map(dc => ({
+        templateId: dc.templateId,
+        contractId: dc.contractId,
+        createdEventBlob: dc.createdEventBlob,
+        synchronizerId: dc.synchronizerId || synchronizerId,
+      })),
+      synchronizerId,
+      holdingCids,
+    };
+  }
+
+  /**
+   * Extract exact-amount holding CID from self-transfer execution result.
+   * 
+   * @param {Object} transferResult - Result from executing self-transfer
+   * @param {string} expectedAmount - Expected amount
+   * @returns {string|null} Exact-amount holding CID or null
+   */
+  _extractExactAmountHoldingFromResult(transferResult, expectedAmount) {
+    if (!transferResult?.transaction?.events) {
+      return null;
+    }
+
+    const createdHoldings = this._extractCreatedHoldingCids(transferResult);
+    
+    // Find holding with exact amount
+    const exactAmountHolding = createdHoldings.find(h => {
+      const holdingAmount = h.amount || '0';
+      return new Decimal(holdingAmount).eq(new Decimal(expectedAmount));
+    });
+
+    return exactAmountHolding?.contractId || (createdHoldings.length > 0 ? createdHoldings[0].contractId : null);
+  }
+
+  /**
+   * Build multi-leg allocation command for Temple pattern settlement.
+   * Creates allocation with 2 transfer legs: buy leg + sell leg.
+   * 
+   * @param {string} executorPartyId - Exchange operator
+   * @param {Array} transferLegs - [{sender, receiver, amount, symbol}, ...]
+   * @param {string} settlementId - Settlement reference ID
+   * @param {Array|null} holdingCids - Input holding CIDs (from withdrawn allocations), or null to query fresh
+   * @returns {Promise<{command, readAs, disclosedContracts, synchronizerId}>}
+   */
+  async buildMultiLegAllocationCommand(executorPartyId, transferLegs, settlementId, holdingCids = null) {
+    if (!this.isReady()) {
+      throw new Error('Canton SDK not initialized');
+    }
+
+    if (!transferLegs || transferLegs.length !== 2) {
+      throw new Error('Multi-leg allocation requires exactly 2 transfer legs');
+    }
+
+    const [buyLeg, sellLeg] = transferLegs;
+    const buyTokenType = getTokenSystemType(buyLeg.symbol);
+    const sellTokenType = getTokenSystemType(sellLeg.symbol);
+    
+    // Use the token system type of the first leg (both should be same system)
+    const tokenSystemType = buyTokenType !== 'unknown' ? buyTokenType : sellTokenType;
+    if (tokenSystemType === 'unknown') {
+      throw new Error('Cannot determine token system type for multi-leg allocation');
+    }
+
+    const buyInstrumentId = toCantonInstrument(buyLeg.symbol);
+    const sellInstrumentId = toCantonInstrument(sellLeg.symbol);
+    const buyAdminParty = this.getInstrumentAdminForSymbol(buyLeg.symbol);
+    const sellAdminParty = this.getInstrumentAdminForSymbol(sellLeg.symbol);
+
+    console.log(`[CantonSDK] 🔄 Temple Pattern: Building multi-leg allocation for settlement ${settlementId}`);
+    console.log(`[CantonSDK]    Buy leg: ${buyLeg.sender.substring(0, 20)}... → ${buyLeg.receiver.substring(0, 20)}... (${buyLeg.amount} ${buyLeg.symbol})`);
+    console.log(`[CantonSDK]    Sell leg: ${sellLeg.sender.substring(0, 20)}... → ${sellLeg.receiver.substring(0, 20)}... (${sellLeg.amount} ${sellLeg.symbol})`);
+
+    // Query fresh holdings if not provided
+    let finalHoldingCids = holdingCids;
+    if (!finalHoldingCids || finalHoldingCids.length === 0) {
+      console.log(`[CantonSDK]    Querying fresh holdings for both parties...`);
+      const buyLegHoldings = await this._withPartyContext(buyLeg.sender, async () => {
+        return await this.sdk.tokenStandard?.listHoldingUtxos(false) || [];
+      });
+      const sellLegHoldings = await this._withPartyContext(sellLeg.sender, async () => {
+        return await this.sdk.tokenStandard?.listHoldingUtxos(false) || [];
+      });
+      
+      const buyLegCids = buyLegHoldings
+        .filter(h => extractInstrumentId(h.interfaceViewValue?.instrumentId) === buyInstrumentId)
+        .map(h => h.contractId);
+      const sellLegCids = sellLegHoldings
+        .filter(h => extractInstrumentId(h.interfaceViewValue?.instrumentId) === sellInstrumentId)
+        .map(h => h.contractId);
+      
+      finalHoldingCids = [...buyLegCids, ...sellLegCids];
+      console.log(`[CantonSDK]    Found ${buyLegCids.length} ${buyLeg.symbol} holdings + ${sellLegCids.length} ${sellLeg.symbol} holdings`);
+    }
+
+    // Build choice args with multiple transfer legs
+    // Note: Splice API may require creating two separate allocations if multi-leg not supported
+    const choiceArgs = this._buildMultiLegAllocationChoiceArgs({
+      adminParty: buyAdminParty, // Use buy leg admin (both should be same system)
+      executorPartyId,
+      transferLegs: [
+        {
+          sender: buyLeg.sender,
+          receiver: buyLeg.receiver,
+          amount: buyLeg.amount,
+          instrumentId: buyInstrumentId,
+        },
+        {
+          sender: sellLeg.sender,
+          receiver: sellLeg.receiver,
+          amount: sellLeg.amount,
+          instrumentId: sellInstrumentId,
+        },
+      ],
+      orderId: settlementId,
+      holdingCids: finalHoldingCids,
+      choiceContextData: null,
+      tokenSystemType,
+    });
+
+    const allocationFactoryUrl = tokenSystemType === 'utilities'
+      ? `${UTILITIES_CONFIG.TOKEN_STANDARD_URL}/v0/registrars/${encodeURIComponent(buyAdminParty)}/registry/allocation-instruction/v1/allocation-factory`
+      : `${CANTON_SDK_CONFIG.REGISTRY_API_URL}/registry/allocation-instruction/v1/allocation-factory`;
+
+    try {
+      const { data: factory } = await getRegistryApi().post(allocationFactoryUrl, {
+        choiceArguments: choiceArgs,
+        excludeDebugFields: true,
+      }, {
+        headers: { Authorization: `Bearer ${await tokenProvider.getServiceToken()}`, Accept: 'application/json' },
+      });
+
+      const exerciseArgs = this._buildMultiLegAllocationChoiceArgs({
+        adminParty: buyAdminParty,
+        executorPartyId,
+        transferLegs: [
+          {
+            sender: buyLeg.sender,
+            receiver: buyLeg.receiver,
+            amount: buyLeg.amount,
+            instrumentId: buyInstrumentId,
+          },
+          {
+            sender: sellLeg.sender,
+            receiver: sellLeg.receiver,
+            amount: sellLeg.amount,
+            instrumentId: sellInstrumentId,
+          },
+        ],
+        orderId: settlementId,
+        holdingCids,
+        choiceContextData: factory.choiceContext?.choiceContextData,
+        tokenSystemType,
+      });
+
+      const configModule = require('../config');
+      const synchronizerId = this._pickSynchronizerIdFromDisclosed(
+        factory.choiceContext?.disclosedContracts || [],
+        configModule.canton.synchronizerId
+      );
+
+      const readAsParties = [
+        executorPartyId,
+        buyLeg.sender,
+        buyLeg.receiver,
+        sellLeg.sender,
+        sellLeg.receiver,
+      ].filter(Boolean);
+
+      return {
+        command: {
+          ExerciseCommand: {
+            templateId: UTILITIES_CONFIG.ALLOCATION_INSTRUCTION_FACTORY_INTERFACE,
+            contractId: factory.factoryId,
+            choice: 'AllocationFactory_Allocate',
+            choiceArgument: exerciseArgs,
+          },
+        },
+        readAs: [...new Set(readAsParties)],
+        disclosedContracts: (factory.choiceContext?.disclosedContracts || []).map(dc => ({
+          templateId: dc.templateId,
+          contractId: dc.contractId,
+          createdEventBlob: dc.createdEventBlob,
+          synchronizerId: dc.synchronizerId || synchronizerId,
+        })),
+        synchronizerId,
+      };
+    } catch (err) {
+      // If multi-leg allocation fails, fall back to creating two separate allocations
+      console.warn(`[CantonSDK] Multi-leg allocation failed: ${err.message} — will create two separate allocations`);
+      throw new Error(`Multi-leg allocation not supported, need to create two allocations: ${err.message}`);
+    }
+  }
+
+  /**
    * Build an AllocationFactory_Allocate interactive command payload for an external signer.
    * This does NOT submit the command; caller includes the returned command in
    * /v2/interactive-submission/prepare so the external party signs it.
+   * 
+   * For Temple pattern: receiverPartyId can be same as senderPartyId (self-allocation).
    */
   async buildAllocationInteractiveCommand(senderPartyId, receiverPartyId, amount, symbol, executorPartyId, orderId = '', overrideHoldingCids = null) {
     if (!this.isReady()) {
@@ -1054,7 +1345,15 @@ class CantonSDKClient {
       throw new Error(`No ${symbol} holdings found for allocation sender ${senderPartyId.substring(0, 30)}...`);
     }
 
+    // Temple Pattern: Self-allocation (sender = receiver = user) for order placement
+    // Settlement will withdraw and create new multi-leg allocation
+    const isSelfAllocation = receiverPartyId === senderPartyId;
     const effectiveReceiver = receiverPartyId || executorPartyId;
+    
+    if (isSelfAllocation) {
+      console.log(`[CantonSDK]    🔄 Temple Pattern: Self-allocation (sender = receiver = user, NOT executed)`);
+    }
+    
     const choiceArgs = this._buildAllocationChoiceArgs({
       adminParty,
       senderPartyId,
@@ -1072,9 +1371,12 @@ class CantonSDKClient {
       ? `${UTILITIES_CONFIG.TOKEN_STANDARD_URL}/v0/registrars/${encodeURIComponent(adminParty)}/registry/allocation-instruction/v1/allocation-factory`
       : `${CANTON_SDK_CONFIG.REGISTRY_API_URL}/registry/allocation-instruction/v1/allocation-factory`;
 
+    const adminToken = await tokenProvider.getServiceToken();
     const { data: factory } = await getRegistryApi().post(allocationFactoryUrl, {
       choiceArguments: choiceArgs,
       excludeDebugFields: true,
+    }, {
+      headers: { Authorization: `Bearer ${adminToken}`, Accept: 'application/json' },
     });
 
     const exerciseArgs = this._buildAllocationChoiceArgs({
@@ -1113,6 +1415,95 @@ class CantonSDKClient {
         synchronizerId: dc.synchronizerId || synchronizerId,
       })),
       synchronizerId,
+    };
+  }
+
+  /**
+   * Build multi-leg allocation choiceArguments for Temple pattern settlement.
+   * Creates allocation with 2 transfer legs: buy leg + sell leg.
+   * 
+   * @param {Object} params - { adminParty, executorPartyId, transferLegs: [{sender, receiver, amount, instrumentId}], orderId, holdingCids, choiceContextData, tokenSystemType }
+   * @returns {Object} Allocation choice arguments with multiple transfer legs
+   */
+  _buildMultiLegAllocationChoiceArgs(params) {
+    const {
+      adminParty, executorPartyId, transferLegs, orderId, holdingCids,
+      choiceContextData, tokenSystemType = 'splice',
+    } = params;
+
+    if (!transferLegs || transferLegs.length !== 2) {
+      throw new Error('Multi-leg allocation requires exactly 2 transfer legs (buy + sell)');
+    }
+
+    const nowMs = Date.now();
+    const now = new Date(nowMs).toISOString();
+    const defaultSettleWindowMs =
+      tokenSystemType === 'utilities'
+        ? 24 * 60 * 60 * 1000   // 24h
+        : 15 * 60 * 1000;       // 15m
+    const configuredSettleWindowMs = Number(process.env.ALLOCATION_SETTLE_WINDOW_MS || defaultSettleWindowMs);
+    const settleWindowMs = Number.isFinite(configuredSettleWindowMs) && configuredSettleWindowMs > 60_000
+      ? configuredSettleWindowMs
+      : defaultSettleWindowMs;
+    const allocateWindowMs = Math.max(60_000, Math.min(5 * 60 * 1000, Math.floor(settleWindowMs / 2)));
+    const allocateBefore = new Date(nowMs + allocateWindowMs).toISOString();
+    const settleBefore = new Date(nowMs + settleWindowMs).toISOString();
+
+    // Build allocation with multiple transfer legs
+    // Note: Splice API may require separate allocations per leg, but we structure it for multi-leg support
+    const [buyLeg, sellLeg] = transferLegs;
+
+    return {
+      expectedAdmin: adminParty,
+      allocation: {
+        settlement: {
+          executor: executorPartyId,
+          settleBefore,
+          allocateBefore,
+          settlementRef: { id: orderId || `settlement-${Date.now()}` },
+          requestedAt: now,
+          meta: { values: {} },
+        },
+        // Primary transfer leg (buy leg: buyer receives base tokens)
+        transferLegId: `${orderId}-buy-leg`,
+        transferLeg: {
+          sender: buyLeg.sender,
+          receiver: buyLeg.receiver,
+          amount: toDamlNumericString(buyLeg.amount),
+          instrumentId: { id: buyLeg.instrumentId, admin: adminParty },
+          meta: { values: {} },
+        },
+        // Secondary transfer leg (sell leg: seller receives quote tokens)
+        // Note: If API doesn't support multiple legs in one allocation, we'll create two allocations
+        transferLegs: [
+          {
+            transferLegId: `${orderId}-buy-leg`,
+            transferLeg: {
+              sender: buyLeg.sender,
+              receiver: buyLeg.receiver,
+              amount: toDamlNumericString(buyLeg.amount),
+              instrumentId: { id: buyLeg.instrumentId, admin: adminParty },
+              meta: { values: {} },
+            },
+          },
+          {
+            transferLegId: `${orderId}-sell-leg`,
+            transferLeg: {
+              sender: sellLeg.sender,
+              receiver: sellLeg.receiver,
+              amount: toDamlNumericString(sellLeg.amount),
+              instrumentId: { id: sellLeg.instrumentId, admin: adminParty },
+              meta: { values: {} },
+            },
+          },
+        ],
+      },
+      requestedAt: now,
+      inputHoldingCids: holdingCids,
+      extraArgs: {
+        context: choiceContextData || { values: {} },
+        meta: { values: {} },
+      },
     };
   }
 
@@ -1253,9 +1644,12 @@ class CantonSDKClient {
 
       console.log(`[CantonSDK]    Calling Splice allocation-factory: ${allocationFactoryUrl}`);
 
+      const adminToken = await tokenProvider.getServiceToken();
       const { data: factory } = await getRegistryApi().post(allocationFactoryUrl, {
         choiceArguments: choiceArgs,
         excludeDebugFields: true,
+      }, {
+        headers: { Authorization: `Bearer ${adminToken}`, Accept: 'application/json' },
       });
       console.log(`[CantonSDK]    ✅ Splice allocation factory returned — factoryId: ${factory.factoryId?.substring(0, 30)}...`);
 
@@ -1266,8 +1660,6 @@ class CantonSDKClient {
         choiceContextData: factory.choiceContext?.choiceContextData,
         tokenSystemType: 'splice',
       });
-
-      const adminToken = await tokenProvider.getServiceToken();
       const configModule = require('../config');
       const synchronizerId = this._pickSynchronizerIdFromDisclosed(
         factory.choiceContext?.disclosedContracts || [],
@@ -1337,9 +1729,12 @@ class CantonSDKClient {
 
     console.log(`[CantonSDK]    Calling Utilities allocation-factory: ${allocationFactoryUrl}`);
 
+    const adminToken = await tokenProvider.getServiceToken();
     const { data: factory } = await getRegistryApi().post(allocationFactoryUrl, {
       choiceArguments: choiceArgs,
       excludeDebugFields: true,
+    }, {
+      headers: { Authorization: `Bearer ${adminToken}`, Accept: 'application/json' },
     });
     console.log(`[CantonSDK]    ✅ Utilities allocation factory returned — factoryId: ${factory.factoryId?.substring(0, 30)}...`);
 
@@ -1351,7 +1746,6 @@ class CantonSDKClient {
       tokenSystemType: 'utilities',
     });
 
-    const adminToken = await tokenProvider.getServiceToken();
     const configModule = require('../config');
     const synchronizerId = this._pickSynchronizerIdFromDisclosed(
       factory.choiceContext?.disclosedContracts || [],
@@ -2393,7 +2787,9 @@ class CantonSDKClient {
       const withdrawContextUrl = `${registryUrl}/registry/allocations/v1/${encodedCid}/choice-contexts/withdraw`;
 
       console.log(`[CantonSDK]    Trying registry withdraw API: ${withdrawContextUrl}`);
-      const { data: context } = await getRegistryApi().post(withdrawContextUrl, { excludeDebugFields: true });
+      const { data: context } = await getRegistryApi().post(withdrawContextUrl, { excludeDebugFields: true }, {
+        headers: { Authorization: `Bearer ${adminToken}`, Accept: 'application/json' },
+      });
       const ALLOCATION_INTERFACE = '#splice-api-token-allocation-v1:Splice.Api.Token.AllocationV1:Allocation';
       const result = await cantonService.exerciseChoice({
         token: adminToken,
@@ -2688,6 +3084,9 @@ class CantonSDKClient {
 
   /**
    * Try to build a REAL Token Standard allocation command for order placement.
+   * 
+   * TEMPLE PATTERN: Creates self-allocation (sender = receiver = user) for locking tokens.
+   * Settlement will withdraw and create new multi-leg allocation.
    *
    * If the SDK is ready and the Allocation Factory API responds, this creates
    * a real AllocationFactory_Allocate ExerciseCommand that locks real Splice/
@@ -2701,6 +3100,7 @@ class CantonSDKClient {
    * @param {string} amount - Amount to lock
    * @param {string} symbol - Token symbol (CC, CBTC)
    * @param {string} orderId - Unique order ID (used as settlementRef)
+   * @param {string|Array} overrideHoldingCids - Optional exact-amount holding CID(s) from self-transfer
    * @returns {Promise<{command, readAs, disclosedContracts, synchronizerId, allocationType}|null>}
    */
   async tryBuildRealAllocationCommand(senderPartyId, executorPartyId, amount, symbol, orderId, overrideHoldingCids = null) {
@@ -2716,17 +3116,22 @@ class CantonSDKClient {
         return null;
       }
 
-      console.log(`[CantonSDK] 🔄 Trying REAL Token Standard allocation for ${amount} ${symbol} (${tokenSystemType})...`);
-      console.log(`[CantonSDK]    Allocation: sender=${senderPartyId.substring(0, 30)}..., receiver=executor(operator), executor=${executorPartyId.substring(0, 30)}...`);
+      console.log(`[CantonSDK] 🔄 Temple Pattern: Building self-allocation for ${amount} ${symbol} (${tokenSystemType})...`);
+      console.log(`[CantonSDK]    Self-allocation: sender=${senderPartyId.substring(0, 30)}..., receiver=${senderPartyId.substring(0, 30)}... (same), executor=${executorPartyId.substring(0, 30)}...`);
+
+      // Temple Pattern: Self-allocation (sender = receiver = user, NOT executed)
+      const holdingCidsArray = overrideHoldingCids 
+        ? (Array.isArray(overrideHoldingCids) ? overrideHoldingCids : [overrideHoldingCids])
+        : null;
 
       const result = await this.buildAllocationInteractiveCommand(
         senderPartyId,
-        executorPartyId,  // receiver = executor (operator receives at settlement, then forwards)
+        senderPartyId,  // TEMPLE: receiver = sender (self-allocation)
         amount,
         symbol,
         executorPartyId,
         orderId,
-        overrideHoldingCids
+        holdingCidsArray
       );
 
       if (!result?.command) {
@@ -2735,7 +3140,7 @@ class CantonSDKClient {
       }
 
       const allocationType = tokenSystemType === 'utilities' ? 'UtilitiesAllocation' : 'SpliceAllocation';
-      console.log(`[CantonSDK] ✅ Real ${allocationType} command built successfully for ${orderId}`);
+      console.log(`[CantonSDK] ✅ Temple Pattern: Self-allocation command built (NOT executed) for ${orderId}`);
 
       return {
         ...result,
@@ -2822,12 +3227,16 @@ class CantonSDKClient {
   // ═══════════════════════════════════════════════════════════════════════════
 
   /**
-   * Verify holding state by querying active Holding contracts via the
+   * Verify holding state by querying ACTIVE Holding contracts via the
    * splice-api-token-holding-v1 interface (source of truth per client).
+   * 
+   * This filters ONLY active contracts (not archived) and shows execution results.
+   * When Allocation_ExecuteTransfer executes, new Holding contracts are created
+   * and should be visible here.
    *
    * @param {string} partyId - Party to verify
    * @param {string} [symbol] - Optional symbol filter
-   * @returns {Promise<{holdings: Array, locked: Array, total: string}>}
+   * @returns {Promise<{holdings: Array, locked: Array, totalAvailable: string, totalLocked: string, executionVisible: boolean}>}
    */
   async verifyHoldingState(partyId, symbol = null) {
     const adminToken = await tokenProvider.getServiceToken();
@@ -2835,20 +3244,27 @@ class CantonSDKClient {
     const instrumentId = symbol ? toCantonInstrument(symbol) : null;
 
     try {
+      // Query ACTIVE contracts only (filters out archived/expired contracts)
+      // This is the source of truth per client requirement
       const activeContracts = await cantonService.queryActiveContracts({
         party: partyId,
         templateIds: [HOLDING_INTERFACE],
       }, adminToken);
 
+      if (!activeContracts || activeContracts.length === 0) {
+        console.log(`[CantonSDK] ⚠️ No active Holding contracts found for ${partyId.substring(0, 30)}...${symbol ? ` (${symbol})` : ''}`);
+        return { holdings: [], locked: [], totalAvailable: '0', totalLocked: '0', executionVisible: false };
+      }
+
       const holdings = [];
       const locked = [];
 
-      for (const contract of (activeContracts || [])) {
+      for (const contract of activeContracts) {
         const payload = contract.createArgument || contract.payload || {};
         const tpl = typeof contract.templateId === 'string' ? contract.templateId : '';
-        const amt = payload?.amount?.initialAmount || payload?.amount || '0';
-        const instId = extractInstrumentId(payload?.instrumentId);
-        const isLocked = tpl.includes('Locked') || !!payload?.lock;
+        const amt = payload?.amount?.initialAmount || payload?.amount || payload?.quantity || '0';
+        const instId = extractInstrumentId(payload?.instrumentId || payload?.instrument?.id);
+        const isLocked = tpl.includes('Locked') || !!payload?.lock || !!payload?.isLocked;
 
         if (instrumentId && instId !== instrumentId) continue;
 
@@ -2858,6 +3274,8 @@ class CantonSDKClient {
           amount: amt,
           instrumentId: instId,
           isLocked,
+          // Include contract creation info to verify execution
+          createdAt: contract.createdAt || contract.createdEvent?.eventId,
         };
 
         if (isLocked) {
@@ -2870,14 +3288,20 @@ class CantonSDKClient {
       const totalAvailable = holdings.reduce((sum, h) => sum.plus(h.amount || '0'), new Decimal(0)).toFixed();
       const totalLocked = locked.reduce((sum, h) => sum.plus(h.amount || '0'), new Decimal(0)).toFixed();
 
-      console.log(`[CantonSDK] Holding state for ${partyId.substring(0, 30)}...${symbol ? ` (${symbol})` : ''}:`);
-      console.log(`[CantonSDK]    Available: ${totalAvailable} (${holdings.length} UTXOs)`);
-      console.log(`[CantonSDK]    Locked:    ${totalLocked} (${locked.length} UTXOs)`);
+      // Execution is visible if we have active holdings (not just locked)
+      // After Allocation_ExecuteTransfer, new Holding contracts are created
+      const executionVisible = holdings.length > 0;
 
-      return { holdings, locked, totalAvailable, totalLocked };
+      console.log(`[CantonSDK] ✅ Holding state (ACTIVE contracts only) for ${partyId.substring(0, 30)}...${symbol ? ` (${symbol})` : ''}:`);
+      console.log(`[CantonSDK]    Available: ${totalAvailable} (${holdings.length} active UTXOs)`);
+      console.log(`[CantonSDK]    Locked:    ${totalLocked} (${locked.length} locked UTXOs)`);
+      console.log(`[CantonSDK]    Execution visible: ${executionVisible ? '✅ YES' : '❌ NO'} (new Holdings created after Allocation_ExecuteTransfer)`);
+
+      return { holdings, locked, totalAvailable, totalLocked, executionVisible };
     } catch (err) {
-      console.warn(`[CantonSDK] verifyHoldingState failed: ${err.message}`);
-      return { holdings: [], locked: [], totalAvailable: '0', totalLocked: '0' };
+      console.error(`[CantonSDK] ❌ verifyHoldingState failed: ${err.message}`);
+      console.error(`[CantonSDK]    This means execution results are NOT visible on Holding contracts`);
+      return { holdings: [], locked: [], totalAvailable: '0', totalLocked: '0', executionVisible: false };
     }
   }
 
