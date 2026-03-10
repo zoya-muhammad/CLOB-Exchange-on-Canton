@@ -19,7 +19,7 @@
 
 require('dotenv').config();
 
-const SCAN_PROXY_BASE = process.env.SCAN_PROXY_BASE || 'http://65.108.40.104:8088';
+const SCAN_PROXY_BASE = process.env.SCAN_PROXY_BASE || 'https://wallet.validator.dev.canton.wolfedgelabs.com/api/validator/v0/scan-proxy';
 
 const CANTON_SDK_CONFIG = {
   // JSON Ledger API — primary for all reads/writes

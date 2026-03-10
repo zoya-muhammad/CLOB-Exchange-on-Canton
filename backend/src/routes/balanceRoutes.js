@@ -153,11 +153,30 @@ router.post('/mint', asyncHandler(async (req, res) => {
         tokenInfo.symbol,
         `faucet_mint_${Date.now()}`
       );
+      
+      // If Accept was skipped (faucet transfer), auto-accept service will handle it
+      if (result.skippedAccept && result.transferInstructionCid) {
+        console.log(`[Balance] TransferInstruction created: ${result.transferInstructionCid.substring(0, 30)}... — auto-accept will complete within seconds`);
+        
+        // Ensure auto-accept is aware of this party (if not already subscribed)
+        try {
+          const { getAutoAcceptService } = require('../services/autoAcceptService');
+          const autoAcceptService = getAutoAcceptService();
+          if (autoAcceptService.isRunning) {
+            await autoAcceptService.onNewPartyRegistered(partyId);
+          }
+        } catch (autoAcceptErr) {
+          console.warn(`[Balance] Auto-accept notification skipped: ${autoAcceptErr.message}`);
+        }
+      }
+      
       results.push({
         symbol: tokenInfo.symbol,
         amount: tokenInfo.amount,
         status: 'minted',
         updateId: result.updateId || null,
+        transferInstructionCid: result.transferInstructionCid || null,
+        autoAcceptPending: result.skippedAccept || false,
       });
       console.log(`[Balance] Transferred ${tokenInfo.amount} ${tokenInfo.symbol} from faucet to ${partyId.substring(0, 30)}...`);
     } catch (err) {
@@ -320,11 +339,30 @@ router.post('/v2/mint', asyncHandler(async (req, res) => {
         tokenInfo.symbol,
         `faucet_mint_v2_${Date.now()}`
       );
+      
+      // If Accept was skipped (faucet transfer), auto-accept service will handle it
+      if (result.skippedAccept && result.transferInstructionCid) {
+        console.log(`[Balance V2] TransferInstruction created: ${result.transferInstructionCid.substring(0, 30)}... — auto-accept will complete within seconds`);
+        
+        // Ensure auto-accept is aware of this party (if not already subscribed)
+        try {
+          const { getAutoAcceptService } = require('../services/autoAcceptService');
+          const autoAcceptService = getAutoAcceptService();
+          if (autoAcceptService.isRunning) {
+            await autoAcceptService.onNewPartyRegistered(partyId);
+          }
+        } catch (autoAcceptErr) {
+          console.warn(`[Balance V2] Auto-accept notification skipped: ${autoAcceptErr.message}`);
+        }
+      }
+      
       results.push({
         symbol: tokenInfo.symbol,
         amount: tokenInfo.amount,
         status: 'minted',
         updateId: result.updateId || null,
+        transferInstructionCid: result.transferInstructionCid || null,
+        autoAcceptPending: result.skippedAccept || false,
       });
       console.log(`[Balance V2] Transferred ${tokenInfo.amount} ${tokenInfo.symbol} from faucet to ${partyId.substring(0, 30)}...`);
     } catch (err) {

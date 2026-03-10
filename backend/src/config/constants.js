@@ -37,14 +37,13 @@ const REGISTRY_BACKEND_API = process.env.REGISTRY_BACKEND_API ||
   'https://api.utilities.digitalasset-dev.com/api/utilities';
 
 // Scan Proxy API - Used for Amulet/CC transfers (accept, send, reject)
-// This is the client's Scan Proxy on WolfEdge infrastructure
+// Switched to validator scan proxy (65.108.40.104:8088 is down)
 // For Amulet transfers: POST /api/scan/v0/amulet-rules
-// CONFIRMED WORKING: http://65.108.40.104:8088/api/scan/v0/amulet-rules
-const SCAN_PROXY_API = process.env.SCAN_PROXY_API || 
-  'http://65.108.40.104:8088';
+const SCAN_PROXY_API = process.env.SCAN_PROXY_API ||
+  'https://wallet.validator.dev.canton.wolfedgelabs.com/api/validator/v0/scan-proxy';
 
-// Legacy Validator Scan Proxy (alternative, requires auth)
-const VALIDATOR_SCAN_PROXY_API = process.env.VALIDATOR_SCAN_PROXY_API || 
+// Validator Scan Proxy (also exposes scan proxy at /v0/scan-proxy)
+const VALIDATOR_SCAN_PROXY_API = process.env.VALIDATOR_SCAN_PROXY_API ||
   'https://wallet.validator.dev.canton.wolfedgelabs.com/api/validator';
 
 // DSO Party ID - Required for Amulet transfers

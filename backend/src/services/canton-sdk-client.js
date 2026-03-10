@@ -557,7 +557,7 @@ class CantonSDKClient {
    * Correct endpoint: /registry/transfer-instruction/v1/transfer-factory
    * Confirmed payload structure via live API probing.
    */
-  async performTransfer(senderPartyId, receiverPartyId, amount, symbol) {
+  async performTransfer(senderPartyId, receiverPartyId, amount, symbol, skipAccept = false) {
     if (!this.isReady()) {
       throw new Error('Canton SDK not initialized');
     }
@@ -565,6 +565,14 @@ class CantonSDKClient {
     const instrumentId = toCantonInstrument(symbol);
     const adminParty = this.getInstrumentAdminForSymbol(symbol);
     const tokenType = getTokenSystemType(symbol);
+
+    // Detect faucet transfers (mint operations) — let auto-accept handle them
+    const FAUCET_PARTY = process.env.FAUCET_PARTY_ID || 'faucet::1220faucet';
+    const isFaucetTransfer = senderPartyId === FAUCET_PARTY || senderPartyId.startsWith('faucet::');
+    if (isFaucetTransfer && !skipAccept) {
+      skipAccept = true;
+      console.log(`[CantonSDK]    🔵 Faucet transfer detected — skipping immediate Accept, auto-accept will handle`);
+    }
 
     console.log(`[CantonSDK] Transfer: ${amount} ${symbol} (${instrumentId})`);
     console.log(`[CantonSDK]    From: ${senderPartyId.substring(0, 30)}...`);
@@ -614,6 +622,8 @@ class CantonSDKClient {
             extraArgs: { context: { values: {} }, meta: { values: {} } },
           },
           excludeDebugFields: true,
+        }, {
+          headers: { Authorization: `Bearer ${adminToken}`, Accept: 'application/json' },
         });
 
         console.log(`[CantonSDK]    Transfer Factory returned — factoryId: ${factory.factoryId?.substring(0, 30)}...`);
@@ -695,6 +705,14 @@ class CantonSDKClient {
     }
 
     // ── Step 3: Accept the TransferInstruction as receiver ─────────────
+    // For faucet transfers (mint), skip immediate Accept and let auto-accept service handle it.
+    // This avoids authorization issues when faucet is external or on a different participant.
+    if (skipAccept) {
+      console.log(`[CantonSDK]    📨 TransferInstruction created: ${tiCid.substring(0, 30)}...`);
+      console.log(`[CantonSDK]    ⏭️ Skipping immediate Accept — auto-accept service will handle this transfer`);
+      return { ...result, transferInstructionCid: tiCid, skippedAccept: true };
+    }
+
     // CRITICAL: AmuletTransferInstruction has signatories: admin (instrumentId.admin) + sender.
     // When receiver exercises Accept, Canton needs ALL parties on the same participant in actAs.
     // Since sender + receiver are both external wallet users on the SAME participant,
@@ -739,7 +757,9 @@ class CantonSDKClient {
         // SDK accept failed — try direct registry accept
         console.warn(`[CantonSDK]    SDK accept failed: ${sdkAcceptErr.message} — trying registry API`);
         const acceptUrl = `${this._getRegistryBaseUrl(tokenType)}/registry/transfer-instructions/v1/${encodeURIComponent(tiCid)}/choice-contexts/accept`;
-        const { data: acceptCtx } = await getRegistryApi().post(acceptUrl, { excludeDebugFields: true });
+        const { data: acceptCtx } = await getRegistryApi().post(acceptUrl, { excludeDebugFields: true }, {
+          headers: { Authorization: `Bearer ${adminToken}`, Accept: 'application/json' },
+        });
         const TRANSFER_INSTRUCTION_INTERFACE = '#splice-api-token-transfer-instruction-v1:Splice.Api.Token.TransferInstructionV1:TransferInstruction';
         const res = await cantonService.exerciseChoice({
           token: adminToken,
