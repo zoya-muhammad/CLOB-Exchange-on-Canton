@@ -1030,3 +1030,4842 @@ Tested this with emptied cache and a new wallet
 
 
 
+
+
+in holding contract it not refelect utxo holding contract become reserved locak is happeing execte is not happening you not see holdig contract it should reflect in holding contract cliejnt is sayting me this you need to filter active cpntract you need to use this holding contract source of tuth hgolkdin contract we need to verify from holdin contract:splice-api-token-holding-v1:Splice.Api.Token.HoldingV1:Holding also cliet said to add batch funtionlity exceution and holding is nto refl;ect on holding contract :
+Transaction 1
+Creating a self-transfer for creating the exact of amount tokens needed for the order, to create a holding of exact same amount
+We are a creating self allocation with sender and receiver as same, point to note we are just the creating allocation and not executing it, purpose is to lock or reserve the tokens for future to settle the order
+https://ccview.io/updates/12206ca53e129973bff08998084e86a946eb3240927b846e526a9d2d717741147264/
+
+
+
+Transaction 2
+This is performed solely by the app provider
+Withdraw the Allocation, purpose is to unlock the same tokens which we locked in the first transaction
+Create a new allocation, with 2 transferlegs one for buy and one for sell
+Execute the above allocation
+
+
+https://ccview.io/updates/12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0/
+Events 218-237
+
+
+
+
+
+PQS:
+
+./v0.6.12-main.20251106.460.6409.va1d78b32/daml3.4/scribe.jar pipeline ledger postgres-document  \
+     --pipeline-filter-parties "wolfedgelabs-wallet::1220dd1b820e91bcce2381e3b2b0e36a1de5ee8a0756190b5b8ca41a43750d303c9b" \
+     --source-ledger-host validator-participant \
+     --source-ledger-port 5001 \
+     --source-ledger-auth OAuth \
+     --target-postgres-host localhost \
+     --target-postgres-port 5432 \
+     --target-postgres-database pqs-devnet \
+     --target-postgres-username notif_user \
+     --target-postgres-password notif_pass \
+     --pipeline-oauth-endpoint "https://keycloak.wolfedgelabs.com:8443/realms/canton-devnet/protocol/openid-connect/token" \
+     --pipeline-oauth-clientid "Sesnp3u6udkFF983rfprvsBbx3X3mBpw" \
+     --pipeline-oauth-clientsecret "mEGBw5Td3OUSanQoGeNMWg2nnPxq1VYc" 
+
+https://ccview.io/updates/12206ca53e129973bff08998084e86a946eb3240927b846e526a9d2d717741147264/ 
+Updates
+
+Consensus
+Featured Apps
+
+Tools
+Search for parties, updates, CNS
+Latest opened round: 86,250
+Sign In
+Explorer
+Updates
+Update 12206c...147264
+Update Details
+12206ca53e129973bff08998084e86a946eb3240927b846e526a9d2d717741147264
+Copied
+
+Receipt
+
+Type:
+Transfer complete
+Total accepted:
+35CC
+Transfers count:
+1
+First sender:
+0abdc5424637c362e7f4ac18d14af2b4::1220be...8f9fa7
+Copied
+First receiver:
+0abdc5424637c362e7f4ac18d14af2b4::1220be...8f9fa7
+Copied
+Recorded:
+02.09.2026 20:59:34
+Raw JSON
+Update Events11
+#0
+Exercised
+EventType_TransferFactory_Transfer
+1 Child
+root event
+Event ID:
+12206ca53e129973bff08998084e86a946eb3240927b846e526a9d2d717741147264:0
+Copied
+Contract ID:
+004b73bef9a25d916efe93af46ed3808e2e486428e017b5718ba1c094d5f2424c6ca10122062968f770bf867cc90d77187118df923844f95b4e98fc1197acfdc09d956d8ce
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.ExternalPartyAmuletRules:ExternalPartyAmuletRules
+Package:
+splice-amulet
+Acting Parties:
+0abdc5424637c362e7f4ac18d14af2b4::1220be37e84c6b57bfea7ced4ee29347384698687d7269554b797b420736d78f9fa7
+View Details
+#1
+Exercised
+EventType_AmuletRules_Transfer
+3 Children
+child event
+Event ID:
+12206ca53e129973bff08998084e86a946eb3240927b846e526a9d2d717741147264:1
+Copied
+Contract ID:
+00e168f53e5fccfa2ea0efebf70181545c311e93f7881fda3b290f49bdf030f3bdca1212208bf48fbae38d98fa33c50487e0b954f30dd46ab61dda49b16b31d9660b3b99b2
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.AmuletRules:AmuletRules
+Package:
+splice-amulet
+Acting Parties:
+0abdc5424637c362e7f4ac18d14af2b4::1220be37e84c6b57bfea7ced4ee29347384698687d7269554b797b420736d78f9fa7
+View Details
+#2
+Exercised
+Archive
+child event
+Event ID:
+12206ca53e129973bff08998084e86a946eb3240927b846e526a9d2d717741147264:2
+Copied
+Contract ID:
+000d53f9a1c39da4cbc3635058fda87d664641fb72f0c66dc40ae74a263578640cca121220067225601f2bd20c2727315b42eeea7ecb7f4af14e8a3c58dee4497d6a2039e5
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:Amulet
+Package:
+splice-amulet
+Acting Parties:
+0abdc5424637c362e7f4ac18d14af2b4::1220be37e84c6b57bfea7ced4ee29347384698687d7269554b797b420736d78f9fa7
+
++1 more
+View Details
+#3
+Created
+child event
+Event ID:
+12206ca53e129973bff08998084e86a946eb3240927b846e526a9d2d717741147264:3
+Copied
+Contract ID:
+00bce9f688029a3890f62e68710bb0d7c196f8c1166c011d1892899608153afb65ca1212209dfe0b55d1e05bf21b56b42af24fbb448141d2a19d22b1c8319b9c55fb05b3b0
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:Amulet
+Package:
+splice-amulet
+Signatories:
+0abdc5424637c362e7f4ac18d14af2b4::1220be37e84c6b57bfea7ced4ee29347384698687d7269554b797b420736d78f9fa7
+
++1 more
+View Details
+#4
+Created
+child event
+Event ID:
+12206ca53e129973bff08998084e86a946eb3240927b846e526a9d2d717741147264:4
+Copied
+Contract ID:
+00cd8f049d343ff406c97f7c8eef699d08370d8542c80a0462a451b52f944a55f0ca12122029ec2c0128ab82a204b28554c929e18409aa62adac2e543f9785ec27869585c9
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:Amulet
+Package:
+splice-amulet
+Signatories:
+0abdc5424637c362e7f4ac18d14af2b4::1220be37e84c6b57bfea7ced4ee29347384698687d7269554b797b420736d78f9fa7
+
++1 more
+View Details
+#5
+Exercised
+EventType_AllocationFactory_Allocate
+3 Children
+root event
+Event ID:
+12206ca53e129973bff08998084e86a946eb3240927b846e526a9d2d717741147264:5
+Copied
+Contract ID:
+004b73bef9a25d916efe93af46ed3808e2e486428e017b5718ba1c094d5f2424c6ca10122062968f770bf867cc90d77187118df923844f95b4e98fc1197acfdc09d956d8ce
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.ExternalPartyAmuletRules:ExternalPartyAmuletRules
+Package:
+splice-amulet
+Acting Parties:
+0abdc5424637c362e7f4ac18d14af2b4::1220be37e84c6b57bfea7ced4ee29347384698687d7269554b797b420736d78f9fa7
+View Details
+#6
+Exercised
+EventType_AmuletRules_ComputeFees
+child event
+Event ID:
+12206ca53e129973bff08998084e86a946eb3240927b846e526a9d2d717741147264:6
+Copied
+Contract ID:
+00e168f53e5fccfa2ea0efebf70181545c311e93f7881fda3b290f49bdf030f3bdca1212208bf48fbae38d98fa33c50487e0b954f30dd46ab61dda49b16b31d9660b3b99b2
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.AmuletRules:AmuletRules
+Package:
+splice-amulet
+Acting Parties:
+0abdc5424637c362e7f4ac18d14af2b4::1220be37e84c6b57bfea7ced4ee29347384698687d7269554b797b420736d78f9fa7
+View Details
+#7
+Exercised
+EventType_AmuletRules_Transfer
+2 Children
+child event
+Event ID:
+12206ca53e129973bff08998084e86a946eb3240927b846e526a9d2d717741147264:7
+Copied
+Contract ID:
+00e168f53e5fccfa2ea0efebf70181545c311e93f7881fda3b290f49bdf030f3bdca1212208bf48fbae38d98fa33c50487e0b954f30dd46ab61dda49b16b31d9660b3b99b2
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.AmuletRules:AmuletRules
+Package:
+splice-amulet
+Acting Parties:
+0abdc5424637c362e7f4ac18d14af2b4::1220be37e84c6b57bfea7ced4ee29347384698687d7269554b797b420736d78f9fa7
+
++1 more
+View Details
+#8
+Exercised
+Archive
+child event
+Event ID:
+12206ca53e129973bff08998084e86a946eb3240927b846e526a9d2d717741147264:8
+Copied
+Contract ID:
+00bce9f688029a3890f62e68710bb0d7c196f8c1166c011d1892899608153afb65ca1212209dfe0b55d1e05bf21b56b42af24fbb448141d2a19d22b1c8319b9c55fb05b3b0
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:Amulet
+Package:
+splice-amulet
+Acting Parties:
+0abdc5424637c362e7f4ac18d14af2b4::1220be37e84c6b57bfea7ced4ee29347384698687d7269554b797b420736d78f9fa7
+
++1 more
+View Details
+#9
+Created
+child event
+Event ID:
+12206ca53e129973bff08998084e86a946eb3240927b846e526a9d2d717741147264:9
+Copied
+Contract ID:
+0099732dc2ff89573de827a8b19fc63ab08848c715e610c49c8737fe7c0200cfe4ca1212203a43b090830470ac16fb6279ca70789e60e901c9e8ffbdbc81e22f68e5f0d11e
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:LockedAmulet
+Package:
+splice-amulet
+Signatories:
+0abdc5424637c362e7f4ac18d14af2b4::1220be37e84c6b57bfea7ced4ee29347384698687d7269554b797b420736d78f9fa7
+
++1 more
+View Details
+#10
+Created
+child event
+Event ID:
+12206ca53e129973bff08998084e86a946eb3240927b846e526a9d2d717741147264:10
+Copied
+Contract ID:
+00c1aeb15148354ebe2db2d9e3579f7a75e34be17a42c608273dbe35d7bdf7d3acca121220af045789e283b8961045b39edc98543dd152920f5bd044852ecf0a7c049d7137
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.AmuletAllocation:AmuletAllocation
+Package:
+splice-amulet
+Signatories:
+0abdc5424637c362e7f4ac18d14af2b4::1220be37e84c6b57bfea7ced4ee29347384698687d7269554b797b420736d78f9fa7
+
++1 more
+Observers:
+temple-mainnet-1::1220f238bb79df3efbbac2ea964c3cd501003971a2cb59043e2dac50b06e85b8620f
+View Details
+Explorer
+Featured Apps
+Activities
+
+Updates
+Transfers
+Offers
+Preapprovals
+Consensus
+
+Validators
+Super Validators
+Governance
+Tools
+
+Webhooks
+Api Documentation
+Batch Transfers
+
+Mainnet
+Terms & Conditions
+Privacy Policy
+©2026 CC View by PixelPlex. All Rights Reserved
+
+background image
+
+
+https://ccview.io/updates/12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0/ 
+
+ Updates
+
+Consensus
+Featured Apps
+
+Tools
+Search for parties, updates, CNS
+Latest opened round: 86,250
+Sign In
+Explorer
+Updates
+Update 122006...098db0
+Update Details
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0
+Copied
+
+Receipt
+
+Type:
+Featured marker created
+Markers created:
+20
+Provider:
+temple-mainnet-1::1220f2...b8620f
+Copied
+Beneficiary:
+temple-mainnet-1::1220f2...b8620f
+Copied
+Recorded:
+02.10.2026 03:30:21
+Raw JSON
+Update Events240
+#0
+Exercised
+EventType_FeaturedAppRight_CreateActivityMarker
+1 Child
+root event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:0
+Copied
+Contract ID:
+001bac86a228f209faad6e7a4adf40cd17b8aa7605f166333d640ad3f0c172eeb6ca111220da4eb40ed3d6f4521dcacf25d027c02f4bd0b9c561bc17d76808d30239c75713
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:FeaturedAppRight
+Package:
+splice-amulet
+Acting Parties:
+temple-mainnet-1::1220f238bb79df3efbbac2ea964c3cd501003971a2cb59043e2dac50b06e85b8620f
+View Details
+#1
+Created
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:1
+Copied
+Contract ID:
+00b5665fcba17fe756faf5a10c2c95182fc301d64aabb0703f92c3ea6643367758ca121220cbf20606079208290b96510c48d6a887851466334bafee20dfadd523166b5528
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:FeaturedAppActivityMarker
+Package:
+splice-amulet
+Signatories:
+DSO::1220b1431ef217342db44d516bb9befde802be7d8899637d290895fa58880f19accc
+Observers:
+temple-mainnet-1::1220f238bb79df3efbbac2ea964c3cd501003971a2cb59043e2dac50b06e85b8620f
+View Details
+#2
+Exercised
+EventType_Allocation_Withdraw
+1 Child
+root event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:2
+Copied
+Contract ID:
+00bc4f6cdb589ee6cfe93a9c6b0ff5b5c1105ef8cb53781383a8884f98e711641dca12122075f2cf6cac065b604a360858d4ea771b4c8f4e45c1bc261526d6c5077fa750de
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.AmuletAllocation:AmuletAllocation
+Package:
+splice-amulet
+Acting Parties:
+65fa95a2d3a23e85c730384542e85b0d::1220a567e98da66083aa765385eced316027ff68fbf9fc2a54d51ba0d22d8d525766
+View Details
+#3
+Exercised
+EventType_LockedAmulet_Unlock
+1 Child
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:3
+Copied
+Contract ID:
+00a81f65f8f070f0f044aab14bf91badff084c34c1e4f597837f8b88719bdb9930ca12122021b0e32b58cdd4aef20291cb3ca91a344cacbc8115325bf7d64304613e841c6f
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:LockedAmulet
+Package:
+splice-amulet
+Acting Parties:
+65fa95a2d3a23e85c730384542e85b0d::1220a567e98da66083aa765385eced316027ff68fbf9fc2a54d51ba0d22d8d525766
+
++1 more
+View Details
+#4
+Created
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:4
+Copied
+Contract ID:
+0072ca11f14122826bc67de73653ac021820093907d280e44566707db6270bb2dfca121220783eb360fe8b3e5cd291c93ac15e0e8b7d43ebede2393a4ba8f4f9864d8431c8
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:Amulet
+Package:
+splice-amulet
+Signatories:
+65fa95a2d3a23e85c730384542e85b0d::1220a567e98da66083aa765385eced316027ff68fbf9fc2a54d51ba0d22d8d525766
+
++1 more
+View Details
+#5
+Exercised
+EventType_TransferFactory_Transfer
+1 Child
+root event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:5
+Copied
+Contract ID:
+004b73bef9a25d916efe93af46ed3808e2e486428e017b5718ba1c094d5f2424c6ca10122062968f770bf867cc90d77187118df923844f95b4e98fc1197acfdc09d956d8ce
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.ExternalPartyAmuletRules:ExternalPartyAmuletRules
+Package:
+splice-amulet
+Acting Parties:
+65fa95a2d3a23e85c730384542e85b0d::1220a567e98da66083aa765385eced316027ff68fbf9fc2a54d51ba0d22d8d525766
+View Details
+#6
+Exercised
+EventType_AmuletRules_Transfer
+2 Children
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:6
+Copied
+Contract ID:
+00e168f53e5fccfa2ea0efebf70181545c311e93f7881fda3b290f49bdf030f3bdca1212208bf48fbae38d98fa33c50487e0b954f30dd46ab61dda49b16b31d9660b3b99b2
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.AmuletRules:AmuletRules
+Package:
+splice-amulet
+Acting Parties:
+65fa95a2d3a23e85c730384542e85b0d::1220a567e98da66083aa765385eced316027ff68fbf9fc2a54d51ba0d22d8d525766
+View Details
+#7
+Exercised
+Archive
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:7
+Copied
+Contract ID:
+0072ca11f14122826bc67de73653ac021820093907d280e44566707db6270bb2dfca121220783eb360fe8b3e5cd291c93ac15e0e8b7d43ebede2393a4ba8f4f9864d8431c8
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:Amulet
+Package:
+splice-amulet
+Acting Parties:
+65fa95a2d3a23e85c730384542e85b0d::1220a567e98da66083aa765385eced316027ff68fbf9fc2a54d51ba0d22d8d525766
+
++1 more
+View Details
+#8
+Created
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:8
+Copied
+Contract ID:
+0003ed5e7bab5f421d8d005465e2399c92faeacb1264c5b13a67d777e446c2c61dca12122012f48102e5751122c5af988bb91644d7de41d281b10b7c46e201309ea7073a96
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:Amulet
+Package:
+splice-amulet
+Signatories:
+65fa95a2d3a23e85c730384542e85b0d::1220a567e98da66083aa765385eced316027ff68fbf9fc2a54d51ba0d22d8d525766
+
++1 more
+View Details
+#9
+Exercised
+EventType_AllocationFactory_Allocate
+3 Children
+root event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:9
+Copied
+Contract ID:
+004b73bef9a25d916efe93af46ed3808e2e486428e017b5718ba1c094d5f2424c6ca10122062968f770bf867cc90d77187118df923844f95b4e98fc1197acfdc09d956d8ce
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.ExternalPartyAmuletRules:ExternalPartyAmuletRules
+Package:
+splice-amulet
+Acting Parties:
+65fa95a2d3a23e85c730384542e85b0d::1220a567e98da66083aa765385eced316027ff68fbf9fc2a54d51ba0d22d8d525766
+View Details
+#10
+Exercised
+EventType_AmuletRules_ComputeFees
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:10
+Copied
+Contract ID:
+00e168f53e5fccfa2ea0efebf70181545c311e93f7881fda3b290f49bdf030f3bdca1212208bf48fbae38d98fa33c50487e0b954f30dd46ab61dda49b16b31d9660b3b99b2
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.AmuletRules:AmuletRules
+Package:
+splice-amulet
+Acting Parties:
+65fa95a2d3a23e85c730384542e85b0d::1220a567e98da66083aa765385eced316027ff68fbf9fc2a54d51ba0d22d8d525766
+View Details
+#11
+Exercised
+EventType_AmuletRules_Transfer
+2 Children
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:11
+Copied
+Contract ID:
+00e168f53e5fccfa2ea0efebf70181545c311e93f7881fda3b290f49bdf030f3bdca1212208bf48fbae38d98fa33c50487e0b954f30dd46ab61dda49b16b31d9660b3b99b2
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.AmuletRules:AmuletRules
+Package:
+splice-amulet
+Acting Parties:
+65fa95a2d3a23e85c730384542e85b0d::1220a567e98da66083aa765385eced316027ff68fbf9fc2a54d51ba0d22d8d525766
+
++1 more
+View Details
+#12
+Exercised
+Archive
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:12
+Copied
+Contract ID:
+0003ed5e7bab5f421d8d005465e2399c92faeacb1264c5b13a67d777e446c2c61dca12122012f48102e5751122c5af988bb91644d7de41d281b10b7c46e201309ea7073a96
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:Amulet
+Package:
+splice-amulet
+Acting Parties:
+65fa95a2d3a23e85c730384542e85b0d::1220a567e98da66083aa765385eced316027ff68fbf9fc2a54d51ba0d22d8d525766
+
++1 more
+View Details
+#13
+Created
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:13
+Copied
+Contract ID:
+0079b3e85e5702b5fd434db058ee7a76a19884aec29f22a29a3e9f3c14e385cfd6ca121220eb33ae3e3ad6963d68d388446ff32b17a957a8b90efa1d032f83312f1176e472
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:LockedAmulet
+Package:
+splice-amulet
+Signatories:
+65fa95a2d3a23e85c730384542e85b0d::1220a567e98da66083aa765385eced316027ff68fbf9fc2a54d51ba0d22d8d525766
+
++1 more
+View Details
+#14
+Created
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:14
+Copied
+Contract ID:
+00f76cb5164eba0086fba09a2f23ef8ab6abc16578c74cb84b443080a241847e63ca121220f5e99aa52fa808a17fefdb38765ed7355014e2ec179f4948c8556985f9ae7ea5
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.AmuletAllocation:AmuletAllocation
+Package:
+splice-amulet
+Signatories:
+65fa95a2d3a23e85c730384542e85b0d::1220a567e98da66083aa765385eced316027ff68fbf9fc2a54d51ba0d22d8d525766
+
++1 more
+Observers:
+temple-mainnet-1::1220f238bb79df3efbbac2ea964c3cd501003971a2cb59043e2dac50b06e85b8620f
+View Details
+#15
+Exercised
+EventType_Allocation_ExecuteTransfer
+2 Children
+root event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:15
+Copied
+Contract ID:
+00f76cb5164eba0086fba09a2f23ef8ab6abc16578c74cb84b443080a241847e63ca121220f5e99aa52fa808a17fefdb38765ed7355014e2ec179f4948c8556985f9ae7ea5
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.AmuletAllocation:AmuletAllocation
+Package:
+splice-amulet
+Acting Parties:
+65fa95a2d3a23e85c730384542e85b0d::1220a567e98da66083aa765385eced316027ff68fbf9fc2a54d51ba0d22d8d525766
+
++2 more
+View Details
+#16
+Exercised
+EventType_LockedAmulet_Unlock
+1 Child
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:16
+Copied
+Contract ID:
+0079b3e85e5702b5fd434db058ee7a76a19884aec29f22a29a3e9f3c14e385cfd6ca121220eb33ae3e3ad6963d68d388446ff32b17a957a8b90efa1d032f83312f1176e472
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:LockedAmulet
+Package:
+splice-amulet
+Acting Parties:
+65fa95a2d3a23e85c730384542e85b0d::1220a567e98da66083aa765385eced316027ff68fbf9fc2a54d51ba0d22d8d525766
+
++1 more
+View Details
+#17
+Created
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:17
+Copied
+Contract ID:
+00a3dfca766af29e54e426eca8263e3faaf2249c338a3df6624de2b1341f4faf30ca121220921f6cb7fe39a080267e820779dd49814a28a0a76bd501e24f9fd1a4dde83288
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:Amulet
+Package:
+splice-amulet
+Signatories:
+65fa95a2d3a23e85c730384542e85b0d::1220a567e98da66083aa765385eced316027ff68fbf9fc2a54d51ba0d22d8d525766
+
++1 more
+View Details
+#18
+Exercised
+EventType_AmuletRules_Transfer
+3 Children
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:18
+Copied
+Contract ID:
+00e168f53e5fccfa2ea0efebf70181545c311e93f7881fda3b290f49bdf030f3bdca1212208bf48fbae38d98fa33c50487e0b954f30dd46ab61dda49b16b31d9660b3b99b2
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.AmuletRules:AmuletRules
+Package:
+splice-amulet
+Acting Parties:
+65fa95a2d3a23e85c730384542e85b0d::1220a567e98da66083aa765385eced316027ff68fbf9fc2a54d51ba0d22d8d525766
+
++2 more
+View Details
+#19
+Exercised
+Archive
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:19
+Copied
+Contract ID:
+00a3dfca766af29e54e426eca8263e3faaf2249c338a3df6624de2b1341f4faf30ca121220921f6cb7fe39a080267e820779dd49814a28a0a76bd501e24f9fd1a4dde83288
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:Amulet
+Package:
+splice-amulet
+Acting Parties:
+65fa95a2d3a23e85c730384542e85b0d::1220a567e98da66083aa765385eced316027ff68fbf9fc2a54d51ba0d22d8d525766
+
++1 more
+View Details
+#20
+Created
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:20
+Copied
+Contract ID:
+000029217b2f32e9e9f5333cf6235d34e6eba71eec197d6042f9bbcf938e9a3afcca121220083a901515a8d600793f59fe84bf2037bdf464a4055df01f31f86a1b131ced45
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:AppRewardCoupon
+Package:
+splice-amulet
+Signatories:
+DSO::1220b1431ef217342db44d516bb9befde802be7d8899637d290895fa58880f19accc
+Observers:
+temple-mainnet-1::1220f238bb79df3efbbac2ea964c3cd501003971a2cb59043e2dac50b06e85b8620f
+View Details
+#21
+Created
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:21
+Copied
+Contract ID:
+0013ac78447d404aee15aff71f80693957f7cc9f9640ba4739282a90044e431e9eca1212205d964d0280f3cd83012d003e68963cef9146066d5b037014421da8eb3e67ed8f
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:Amulet
+Package:
+splice-amulet
+Signatories:
+DSO::1220b1431ef217342db44d516bb9befde802be7d8899637d290895fa58880f19accc
+
++1 more
+View Details
+#22
+Exercised
+EventType_FeaturedAppRight_CreateActivityMarker
+1 Child
+root event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:22
+Copied
+Contract ID:
+0012ec4c4b1fde3234437ea4e87f6e09f672ae5a9dd2ab2b93f19a65da1aafd8dbca111220efbebbc1ca3c63a0babbac1d566668d26117418670021cf2b9be29d24db0245e
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:FeaturedAppRight
+Package:
+splice-amulet
+Acting Parties:
+Bridge-Operator::1220c8448890a70e65f6906bd48d797ee6551f094e9e6a53e329fd5b2b549334f13f
+View Details
+#23
+Created
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:23
+Copied
+Contract ID:
+00ab535583ecbe00a7b8e4531b74a5e42a6ed9ad9bb543d4bbc8be37a8f9652014ca12122063f536c305e4a686416023969fb6d89a8d0c88f07ef334fac8b8c4c7d08f0391
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:FeaturedAppActivityMarker
+Package:
+splice-amulet
+Signatories:
+DSO::1220b1431ef217342db44d516bb9befde802be7d8899637d290895fa58880f19accc
+Observers:
+Bridge-Operator::1220c8448890a70e65f6906bd48d797ee6551f094e9e6a53e329fd5b2b549334f13f
+View Details
+#24
+Exercised
+EventType_FeaturedAppRight_CreateActivityMarker
+1 Child
+root event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:24
+Copied
+Contract ID:
+001bac86a228f209faad6e7a4adf40cd17b8aa7605f166333d640ad3f0c172eeb6ca111220da4eb40ed3d6f4521dcacf25d027c02f4bd0b9c561bc17d76808d30239c75713
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:FeaturedAppRight
+Package:
+splice-amulet
+Acting Parties:
+temple-mainnet-1::1220f238bb79df3efbbac2ea964c3cd501003971a2cb59043e2dac50b06e85b8620f
+View Details
+#25
+Created
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:25
+Copied
+Contract ID:
+0090b1983439ecd2836ba99ccb4e7b4101df7698b945852b92132261ac88357744ca1212208d6203f04c4ff03062d304f3d83c108aef177462eed688366c559eecd6195476
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:FeaturedAppActivityMarker
+Package:
+splice-amulet
+Signatories:
+DSO::1220b1431ef217342db44d516bb9befde802be7d8899637d290895fa58880f19accc
+Observers:
+temple-mainnet-1::1220f238bb79df3efbbac2ea964c3cd501003971a2cb59043e2dac50b06e85b8620f
+View Details
+#26
+Exercised
+EventType_Allocation_Withdraw
+1 Child
+root event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:26
+Copied
+Contract ID:
+00fc557ca1d18926fd4924a320724c4f776aeaebea27b171bb25f4374539de37f7ca1212205c899e61da6b275ee5b93264047c02730527afbbbbcd9102b5662e9a7cf779ce
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.AmuletAllocation:AmuletAllocation
+Package:
+splice-amulet
+Acting Parties:
+a57a9e58c36bffc26259f4d7f09ff22e::122077e1a65e25248e537244a23e43b6a79d970e205fc4f4180214f574a0beaaeccb
+View Details
+#27
+Exercised
+EventType_LockedAmulet_Unlock
+1 Child
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:27
+Copied
+Contract ID:
+00112b929b0b25d153fbef1d85df0f35f26b8f3a01875162dd24ac99703ff5294dca12122078fdb6b9f775cd36d33ba52b81f3e4dbe54f4d2cc4ba28dd84fc081150730b00
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:LockedAmulet
+Package:
+splice-amulet
+Acting Parties:
+DSO::1220b1431ef217342db44d516bb9befde802be7d8899637d290895fa58880f19accc
+
++1 more
+View Details
+#28
+Created
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:28
+Copied
+Contract ID:
+001479d95b14b25f517b099c51a2ec376b73bcf22f04379af0f30c4c9ee976c5f5ca121220f5b6aa995cdc21029890cbf5fd98cbe062e9949a118c3dfcb4764be68b28b55b
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:Amulet
+Package:
+splice-amulet
+Signatories:
+DSO::1220b1431ef217342db44d516bb9befde802be7d8899637d290895fa58880f19accc
+
++1 more
+View Details
+#29
+Exercised
+EventType_TransferFactory_Transfer
+1 Child
+root event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:29
+Copied
+Contract ID:
+004b73bef9a25d916efe93af46ed3808e2e486428e017b5718ba1c094d5f2424c6ca10122062968f770bf867cc90d77187118df923844f95b4e98fc1197acfdc09d956d8ce
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.ExternalPartyAmuletRules:ExternalPartyAmuletRules
+Package:
+splice-amulet
+Acting Parties:
+a57a9e58c36bffc26259f4d7f09ff22e::122077e1a65e25248e537244a23e43b6a79d970e205fc4f4180214f574a0beaaeccb
+View Details
+#30
+Exercised
+EventType_AmuletRules_Transfer
+2 Children
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:30
+Copied
+Contract ID:
+00e168f53e5fccfa2ea0efebf70181545c311e93f7881fda3b290f49bdf030f3bdca1212208bf48fbae38d98fa33c50487e0b954f30dd46ab61dda49b16b31d9660b3b99b2
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.AmuletRules:AmuletRules
+Package:
+splice-amulet
+Acting Parties:
+a57a9e58c36bffc26259f4d7f09ff22e::122077e1a65e25248e537244a23e43b6a79d970e205fc4f4180214f574a0beaaeccb
+View Details
+#31
+Exercised
+Archive
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:31
+Copied
+Contract ID:
+001479d95b14b25f517b099c51a2ec376b73bcf22f04379af0f30c4c9ee976c5f5ca121220f5b6aa995cdc21029890cbf5fd98cbe062e9949a118c3dfcb4764be68b28b55b
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:Amulet
+Package:
+splice-amulet
+Acting Parties:
+DSO::1220b1431ef217342db44d516bb9befde802be7d8899637d290895fa58880f19accc
+
++1 more
+View Details
+#32
+Created
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:32
+Copied
+Contract ID:
+00864becd85036e2bf51898bf87f9c975649093f90a91cd045e5d9bd7d647618c7ca1212208a63df8ab38d719197216da2cff152771261ae2c5592b853a023c58c5dca000a
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:Amulet
+Package:
+splice-amulet
+Signatories:
+DSO::1220b1431ef217342db44d516bb9befde802be7d8899637d290895fa58880f19accc
+
++1 more
+View Details
+#33
+Exercised
+EventType_AllocationFactory_Allocate
+3 Children
+root event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:33
+Copied
+Contract ID:
+004b73bef9a25d916efe93af46ed3808e2e486428e017b5718ba1c094d5f2424c6ca10122062968f770bf867cc90d77187118df923844f95b4e98fc1197acfdc09d956d8ce
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.ExternalPartyAmuletRules:ExternalPartyAmuletRules
+Package:
+splice-amulet
+Acting Parties:
+a57a9e58c36bffc26259f4d7f09ff22e::122077e1a65e25248e537244a23e43b6a79d970e205fc4f4180214f574a0beaaeccb
+View Details
+#34
+Exercised
+EventType_AmuletRules_ComputeFees
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:34
+Copied
+Contract ID:
+00e168f53e5fccfa2ea0efebf70181545c311e93f7881fda3b290f49bdf030f3bdca1212208bf48fbae38d98fa33c50487e0b954f30dd46ab61dda49b16b31d9660b3b99b2
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.AmuletRules:AmuletRules
+Package:
+splice-amulet
+Acting Parties:
+a57a9e58c36bffc26259f4d7f09ff22e::122077e1a65e25248e537244a23e43b6a79d970e205fc4f4180214f574a0beaaeccb
+View Details
+#35
+Exercised
+EventType_AmuletRules_Transfer
+2 Children
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:35
+Copied
+Contract ID:
+00e168f53e5fccfa2ea0efebf70181545c311e93f7881fda3b290f49bdf030f3bdca1212208bf48fbae38d98fa33c50487e0b954f30dd46ab61dda49b16b31d9660b3b99b2
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.AmuletRules:AmuletRules
+Package:
+splice-amulet
+Acting Parties:
+DSO::1220b1431ef217342db44d516bb9befde802be7d8899637d290895fa58880f19accc
+
++1 more
+View Details
+#36
+Exercised
+Archive
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:36
+Copied
+Contract ID:
+00864becd85036e2bf51898bf87f9c975649093f90a91cd045e5d9bd7d647618c7ca1212208a63df8ab38d719197216da2cff152771261ae2c5592b853a023c58c5dca000a
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:Amulet
+Package:
+splice-amulet
+Acting Parties:
+DSO::1220b1431ef217342db44d516bb9befde802be7d8899637d290895fa58880f19accc
+
++1 more
+View Details
+#37
+Created
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:37
+Copied
+Contract ID:
+001b2a9aee6896faf5eb20767a7b3f00263c0246ecab707f75d5f6c5dcaca35219ca121220d02a1c62e97a030a8b56c21a691c3fc2b67dc134e92e0bd29d5f3341741e1391
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:LockedAmulet
+Package:
+splice-amulet
+Signatories:
+DSO::1220b1431ef217342db44d516bb9befde802be7d8899637d290895fa58880f19accc
+
++1 more
+View Details
+#38
+Created
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:38
+Copied
+Contract ID:
+00e1cbf68fa10bfd36490ace0c99cb0c76f1d3f5ce3318ea5969f774a4cf1d1fc5ca1212206dd78426f51a81b88793af595f687652a8bb81a9f8da7abb388755e8ff00f1ce
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.AmuletAllocation:AmuletAllocation
+Package:
+splice-amulet
+Signatories:
+DSO::1220b1431ef217342db44d516bb9befde802be7d8899637d290895fa58880f19accc
+
++1 more
+Observers:
+temple-mainnet-1::1220f238bb79df3efbbac2ea964c3cd501003971a2cb59043e2dac50b06e85b8620f
+View Details
+#39
+Exercised
+EventType_Allocation_ExecuteTransfer
+2 Children
+root event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:39
+Copied
+Contract ID:
+00e1cbf68fa10bfd36490ace0c99cb0c76f1d3f5ce3318ea5969f774a4cf1d1fc5ca1212206dd78426f51a81b88793af595f687652a8bb81a9f8da7abb388755e8ff00f1ce
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.AmuletAllocation:AmuletAllocation
+Package:
+splice-amulet
+Acting Parties:
+a57a9e58c36bffc26259f4d7f09ff22e::122077e1a65e25248e537244a23e43b6a79d970e205fc4f4180214f574a0beaaeccb
+
++2 more
+View Details
+#40
+Exercised
+EventType_LockedAmulet_Unlock
+1 Child
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:40
+Copied
+Contract ID:
+001b2a9aee6896faf5eb20767a7b3f00263c0246ecab707f75d5f6c5dcaca35219ca121220d02a1c62e97a030a8b56c21a691c3fc2b67dc134e92e0bd29d5f3341741e1391
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:LockedAmulet
+Package:
+splice-amulet
+Acting Parties:
+DSO::1220b1431ef217342db44d516bb9befde802be7d8899637d290895fa58880f19accc
+
++1 more
+View Details
+#41
+Created
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:41
+Copied
+Contract ID:
+001513b5b609d6710734a3998d920ae5584c99dd6226f775031fbfe0ef5940fb54ca1212207163953ac571b89fde7fe6ac8c739c347ffe96c7d3666d7b04703ea188b55a18
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:Amulet
+Package:
+splice-amulet
+Signatories:
+DSO::1220b1431ef217342db44d516bb9befde802be7d8899637d290895fa58880f19accc
+
++1 more
+View Details
+#42
+Exercised
+EventType_AmuletRules_Transfer
+3 Children
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:42
+Copied
+Contract ID:
+00e168f53e5fccfa2ea0efebf70181545c311e93f7881fda3b290f49bdf030f3bdca1212208bf48fbae38d98fa33c50487e0b954f30dd46ab61dda49b16b31d9660b3b99b2
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.AmuletRules:AmuletRules
+Package:
+splice-amulet
+Acting Parties:
+a57a9e58c36bffc26259f4d7f09ff22e::122077e1a65e25248e537244a23e43b6a79d970e205fc4f4180214f574a0beaaeccb
+
++2 more
+View Details
+#43
+Exercised
+Archive
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:43
+Copied
+Contract ID:
+001513b5b609d6710734a3998d920ae5584c99dd6226f775031fbfe0ef5940fb54ca1212207163953ac571b89fde7fe6ac8c739c347ffe96c7d3666d7b04703ea188b55a18
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:Amulet
+Package:
+splice-amulet
+Acting Parties:
+DSO::1220b1431ef217342db44d516bb9befde802be7d8899637d290895fa58880f19accc
+
++1 more
+View Details
+#44
+Created
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:44
+Copied
+Contract ID:
+00408f546f0aff6b3adcd31eb356f85ff9c4c46683259b0c6ad2e16dbac67b549aca121220c7fa82d804a0b76bf5b77e46c3f0773033872d432a19da45810d491366de8804
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:AppRewardCoupon
+Package:
+splice-amulet
+Signatories:
+DSO::1220b1431ef217342db44d516bb9befde802be7d8899637d290895fa58880f19accc
+Observers:
+temple-mainnet-1::1220f238bb79df3efbbac2ea964c3cd501003971a2cb59043e2dac50b06e85b8620f
+View Details
+#45
+Created
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:45
+Copied
+Contract ID:
+008016d36fe0877fc6481248e979f913054d9bce7ae3583f0a3581a8b93b98a8e4ca1212203b3cc470bb8fed84884127651d384488eefca0e2be171e640b165b641ccb4bf2
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:Amulet
+Package:
+splice-amulet
+Signatories:
+DSO::1220b1431ef217342db44d516bb9befde802be7d8899637d290895fa58880f19accc
+
++1 more
+View Details
+#46
+Exercised
+EventType_FeaturedAppRight_CreateActivityMarker
+1 Child
+root event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:46
+Copied
+Contract ID:
+0012ec4c4b1fde3234437ea4e87f6e09f672ae5a9dd2ab2b93f19a65da1aafd8dbca111220efbebbc1ca3c63a0babbac1d566668d26117418670021cf2b9be29d24db0245e
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:FeaturedAppRight
+Package:
+splice-amulet
+Acting Parties:
+Bridge-Operator::1220c8448890a70e65f6906bd48d797ee6551f094e9e6a53e329fd5b2b549334f13f
+View Details
+#47
+Created
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:47
+Copied
+Contract ID:
+00c20deb4224a7926433dc7d3128e5a4ecbc36ce0a29de9f91675354363d24e6c7ca12122060bc82fea2f1b1d606e1e3f1b2b3c3e6bc1089a5cc72b2b414aabca53e0a3ead
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:FeaturedAppActivityMarker
+Package:
+splice-amulet
+Signatories:
+DSO::1220b1431ef217342db44d516bb9befde802be7d8899637d290895fa58880f19accc
+Observers:
+Bridge-Operator::1220c8448890a70e65f6906bd48d797ee6551f094e9e6a53e329fd5b2b549334f13f
+View Details
+#48
+Exercised
+EventType_FeaturedAppRight_CreateActivityMarker
+1 Child
+root event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:48
+Copied
+Contract ID:
+001bac86a228f209faad6e7a4adf40cd17b8aa7605f166333d640ad3f0c172eeb6ca111220da4eb40ed3d6f4521dcacf25d027c02f4bd0b9c561bc17d76808d30239c75713
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:FeaturedAppRight
+Package:
+splice-amulet
+Acting Parties:
+temple-mainnet-1::1220f238bb79df3efbbac2ea964c3cd501003971a2cb59043e2dac50b06e85b8620f
+View Details
+#49
+Created
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:49
+Copied
+Contract ID:
+005ad7e7a86f50c5607c3d1ffbe0c34b88c747c67417d1031c314031fb369248bdca121220966e33584300c8df4e251caf932938140fe6b26dcec08f05356cad4d63ba7b85
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:FeaturedAppActivityMarker
+Package:
+splice-amulet
+Signatories:
+DSO::1220b1431ef217342db44d516bb9befde802be7d8899637d290895fa58880f19accc
+Observers:
+temple-mainnet-1::1220f238bb79df3efbbac2ea964c3cd501003971a2cb59043e2dac50b06e85b8620f
+View Details
+#50
+Exercised
+EventType_Allocation_Withdraw
+1 Child
+root event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:50
+Copied
+Contract ID:
+008b06a88bc2e43c244624920387bcb9c802788ec7c85bafcae48a491b904ca42cca121220aded7383f87cb4d9e815e80e42d627325e051f392a6751fe5f793a5ef603f1d7
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.AmuletAllocation:AmuletAllocation
+Package:
+splice-amulet
+Acting Parties:
+8fc8324e93c7f299a7d5b71608fb4dd8::1220813db5bc3ce0fe40d9901315371cfceb895ff3f3f05b70bb8638ace83b3b656c
+View Details
+#51
+Exercised
+EventType_LockedAmulet_Unlock
+1 Child
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:51
+Copied
+Contract ID:
+00f7538c8347509389d79b251af93d33ed9e903e03b656a78d598c0b545b951d99ca1212209bffff3c82e13576fa16eceefc35d514f7946262b665fcb2567785bb1f3e7f24
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:LockedAmulet
+Package:
+splice-amulet
+Acting Parties:
+8fc8324e93c7f299a7d5b71608fb4dd8::1220813db5bc3ce0fe40d9901315371cfceb895ff3f3f05b70bb8638ace83b3b656c
+
++1 more
+View Details
+#52
+Created
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:52
+Copied
+Contract ID:
+00cdda313f2e0902841093bd309f2920a8f10c5dac623025d0ba6782d06f624bfdca121220d06dc46b64f45dd9688cc1663ef95d00d21e9bc001c8288e0b0baff5e17f691b
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:Amulet
+Package:
+splice-amulet
+Signatories:
+8fc8324e93c7f299a7d5b71608fb4dd8::1220813db5bc3ce0fe40d9901315371cfceb895ff3f3f05b70bb8638ace83b3b656c
+
++1 more
+View Details
+#53
+Exercised
+EventType_TransferFactory_Transfer
+1 Child
+root event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:53
+Copied
+Contract ID:
+004b73bef9a25d916efe93af46ed3808e2e486428e017b5718ba1c094d5f2424c6ca10122062968f770bf867cc90d77187118df923844f95b4e98fc1197acfdc09d956d8ce
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.ExternalPartyAmuletRules:ExternalPartyAmuletRules
+Package:
+splice-amulet
+Acting Parties:
+8fc8324e93c7f299a7d5b71608fb4dd8::1220813db5bc3ce0fe40d9901315371cfceb895ff3f3f05b70bb8638ace83b3b656c
+View Details
+#54
+Exercised
+EventType_AmuletRules_Transfer
+2 Children
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:54
+Copied
+Contract ID:
+00e168f53e5fccfa2ea0efebf70181545c311e93f7881fda3b290f49bdf030f3bdca1212208bf48fbae38d98fa33c50487e0b954f30dd46ab61dda49b16b31d9660b3b99b2
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.AmuletRules:AmuletRules
+Package:
+splice-amulet
+Acting Parties:
+8fc8324e93c7f299a7d5b71608fb4dd8::1220813db5bc3ce0fe40d9901315371cfceb895ff3f3f05b70bb8638ace83b3b656c
+View Details
+#55
+Exercised
+Archive
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:55
+Copied
+Contract ID:
+00cdda313f2e0902841093bd309f2920a8f10c5dac623025d0ba6782d06f624bfdca121220d06dc46b64f45dd9688cc1663ef95d00d21e9bc001c8288e0b0baff5e17f691b
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:Amulet
+Package:
+splice-amulet
+Acting Parties:
+8fc8324e93c7f299a7d5b71608fb4dd8::1220813db5bc3ce0fe40d9901315371cfceb895ff3f3f05b70bb8638ace83b3b656c
+
++1 more
+View Details
+#56
+Created
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:56
+Copied
+Contract ID:
+00474d90f1b4bd7ccd28d0a63db7eccb5999e54a88aef9f20933a4faaafd891e0dca12122069734fac51594a07a41ba96b1155b7e0a6e952e71be245359aeee01ae0c9d81e
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:Amulet
+Package:
+splice-amulet
+Signatories:
+8fc8324e93c7f299a7d5b71608fb4dd8::1220813db5bc3ce0fe40d9901315371cfceb895ff3f3f05b70bb8638ace83b3b656c
+
++1 more
+View Details
+#57
+Exercised
+EventType_AllocationFactory_Allocate
+3 Children
+root event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:57
+Copied
+Contract ID:
+004b73bef9a25d916efe93af46ed3808e2e486428e017b5718ba1c094d5f2424c6ca10122062968f770bf867cc90d77187118df923844f95b4e98fc1197acfdc09d956d8ce
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.ExternalPartyAmuletRules:ExternalPartyAmuletRules
+Package:
+splice-amulet
+Acting Parties:
+8fc8324e93c7f299a7d5b71608fb4dd8::1220813db5bc3ce0fe40d9901315371cfceb895ff3f3f05b70bb8638ace83b3b656c
+View Details
+#58
+Exercised
+EventType_AmuletRules_ComputeFees
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:58
+Copied
+Contract ID:
+00e168f53e5fccfa2ea0efebf70181545c311e93f7881fda3b290f49bdf030f3bdca1212208bf48fbae38d98fa33c50487e0b954f30dd46ab61dda49b16b31d9660b3b99b2
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.AmuletRules:AmuletRules
+Package:
+splice-amulet
+Acting Parties:
+8fc8324e93c7f299a7d5b71608fb4dd8::1220813db5bc3ce0fe40d9901315371cfceb895ff3f3f05b70bb8638ace83b3b656c
+View Details
+#59
+Exercised
+EventType_AmuletRules_Transfer
+2 Children
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:59
+Copied
+Contract ID:
+00e168f53e5fccfa2ea0efebf70181545c311e93f7881fda3b290f49bdf030f3bdca1212208bf48fbae38d98fa33c50487e0b954f30dd46ab61dda49b16b31d9660b3b99b2
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.AmuletRules:AmuletRules
+Package:
+splice-amulet
+Acting Parties:
+8fc8324e93c7f299a7d5b71608fb4dd8::1220813db5bc3ce0fe40d9901315371cfceb895ff3f3f05b70bb8638ace83b3b656c
+
++1 more
+View Details
+#60
+Exercised
+Archive
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:60
+Copied
+Contract ID:
+00474d90f1b4bd7ccd28d0a63db7eccb5999e54a88aef9f20933a4faaafd891e0dca12122069734fac51594a07a41ba96b1155b7e0a6e952e71be245359aeee01ae0c9d81e
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:Amulet
+Package:
+splice-amulet
+Acting Parties:
+8fc8324e93c7f299a7d5b71608fb4dd8::1220813db5bc3ce0fe40d9901315371cfceb895ff3f3f05b70bb8638ace83b3b656c
+
++1 more
+View Details
+#61
+Created
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:61
+Copied
+Contract ID:
+000d8450ebc5dcf3f8caee129c2da9402cf6881996fa5b1808ed66df995a76b816ca1212208ee6a9086c6b1419cd7d0c72907de9230ffbf8dd233775727f3fe77f2063b8ed
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:LockedAmulet
+Package:
+splice-amulet
+Signatories:
+8fc8324e93c7f299a7d5b71608fb4dd8::1220813db5bc3ce0fe40d9901315371cfceb895ff3f3f05b70bb8638ace83b3b656c
+
++1 more
+View Details
+#62
+Created
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:62
+Copied
+Contract ID:
+00238994b5819b929515ba437fe76aa9266d2569513fc238a584a0901d79946b7fca121220dcd9bc8e45716b3dd64146a777ccc5ebeee054c41779505a2b61d14237ab943c
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.AmuletAllocation:AmuletAllocation
+Package:
+splice-amulet
+Signatories:
+8fc8324e93c7f299a7d5b71608fb4dd8::1220813db5bc3ce0fe40d9901315371cfceb895ff3f3f05b70bb8638ace83b3b656c
+
++1 more
+Observers:
+temple-mainnet-1::1220f238bb79df3efbbac2ea964c3cd501003971a2cb59043e2dac50b06e85b8620f
+View Details
+#63
+Exercised
+EventType_Allocation_ExecuteTransfer
+2 Children
+root event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:63
+Copied
+Contract ID:
+00238994b5819b929515ba437fe76aa9266d2569513fc238a584a0901d79946b7fca121220dcd9bc8e45716b3dd64146a777ccc5ebeee054c41779505a2b61d14237ab943c
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.AmuletAllocation:AmuletAllocation
+Package:
+splice-amulet
+Acting Parties:
+8fc8324e93c7f299a7d5b71608fb4dd8::1220813db5bc3ce0fe40d9901315371cfceb895ff3f3f05b70bb8638ace83b3b656c
+
++2 more
+View Details
+#64
+Exercised
+EventType_LockedAmulet_Unlock
+1 Child
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:64
+Copied
+Contract ID:
+000d8450ebc5dcf3f8caee129c2da9402cf6881996fa5b1808ed66df995a76b816ca1212208ee6a9086c6b1419cd7d0c72907de9230ffbf8dd233775727f3fe77f2063b8ed
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:LockedAmulet
+Package:
+splice-amulet
+Acting Parties:
+8fc8324e93c7f299a7d5b71608fb4dd8::1220813db5bc3ce0fe40d9901315371cfceb895ff3f3f05b70bb8638ace83b3b656c
+
++1 more
+View Details
+#65
+Created
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:65
+Copied
+Contract ID:
+00823fe9f0d27f3e043868de29aef0a2379f17c7e5fd469ad32f61f38843bce8b8ca121220bc39184689307956a8450796619665fd895852ca1f0a9746ddbc61d5abe4ba83
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:Amulet
+Package:
+splice-amulet
+Signatories:
+8fc8324e93c7f299a7d5b71608fb4dd8::1220813db5bc3ce0fe40d9901315371cfceb895ff3f3f05b70bb8638ace83b3b656c
+
++1 more
+View Details
+#66
+Exercised
+EventType_AmuletRules_Transfer
+3 Children
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:66
+Copied
+Contract ID:
+00e168f53e5fccfa2ea0efebf70181545c311e93f7881fda3b290f49bdf030f3bdca1212208bf48fbae38d98fa33c50487e0b954f30dd46ab61dda49b16b31d9660b3b99b2
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.AmuletRules:AmuletRules
+Package:
+splice-amulet
+Acting Parties:
+8fc8324e93c7f299a7d5b71608fb4dd8::1220813db5bc3ce0fe40d9901315371cfceb895ff3f3f05b70bb8638ace83b3b656c
+
++2 more
+View Details
+#67
+Exercised
+Archive
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:67
+Copied
+Contract ID:
+00823fe9f0d27f3e043868de29aef0a2379f17c7e5fd469ad32f61f38843bce8b8ca121220bc39184689307956a8450796619665fd895852ca1f0a9746ddbc61d5abe4ba83
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:Amulet
+Package:
+splice-amulet
+Acting Parties:
+8fc8324e93c7f299a7d5b71608fb4dd8::1220813db5bc3ce0fe40d9901315371cfceb895ff3f3f05b70bb8638ace83b3b656c
+
++1 more
+View Details
+#68
+Created
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:68
+Copied
+Contract ID:
+0051935ba69c8c03b8d373ca047bcd572c79b9bca91d19065f79233df7b865fe26ca121220b3c97f508ee15352158ff88bb6ecffe0da96cc932e7f02a84fbaaa9024a3e0bd
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:AppRewardCoupon
+Package:
+splice-amulet
+Signatories:
+DSO::1220b1431ef217342db44d516bb9befde802be7d8899637d290895fa58880f19accc
+Observers:
+temple-mainnet-1::1220f238bb79df3efbbac2ea964c3cd501003971a2cb59043e2dac50b06e85b8620f
+View Details
+#69
+Created
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:69
+Copied
+Contract ID:
+002650f222c4a3095a7ccba5b460c72fa1175d524888d2d6ae4e2780157ff896dcca1212207d2cee96b4d50d7041dc3a992eeeda50b1c12ce992099020dd7e31934669e529
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:Amulet
+Package:
+splice-amulet
+Signatories:
+DSO::1220b1431ef217342db44d516bb9befde802be7d8899637d290895fa58880f19accc
+
++1 more
+View Details
+#70
+Exercised
+EventType_FeaturedAppRight_CreateActivityMarker
+1 Child
+root event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:70
+Copied
+Contract ID:
+0012ec4c4b1fde3234437ea4e87f6e09f672ae5a9dd2ab2b93f19a65da1aafd8dbca111220efbebbc1ca3c63a0babbac1d566668d26117418670021cf2b9be29d24db0245e
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:FeaturedAppRight
+Package:
+splice-amulet
+Acting Parties:
+Bridge-Operator::1220c8448890a70e65f6906bd48d797ee6551f094e9e6a53e329fd5b2b549334f13f
+View Details
+#71
+Created
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:71
+Copied
+Contract ID:
+00c4da28b9009ad9caa139985abfedc43e9dcda257506aaeacf56e368d35ee4808ca121220c8de072e1f09ca038ab85e54427515cc0757a76a594cf0fa49f1fb8e658445e7
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:FeaturedAppActivityMarker
+Package:
+splice-amulet
+Signatories:
+DSO::1220b1431ef217342db44d516bb9befde802be7d8899637d290895fa58880f19accc
+Observers:
+Bridge-Operator::1220c8448890a70e65f6906bd48d797ee6551f094e9e6a53e329fd5b2b549334f13f
+View Details
+#72
+Exercised
+EventType_FeaturedAppRight_CreateActivityMarker
+1 Child
+root event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:72
+Copied
+Contract ID:
+001bac86a228f209faad6e7a4adf40cd17b8aa7605f166333d640ad3f0c172eeb6ca111220da4eb40ed3d6f4521dcacf25d027c02f4bd0b9c561bc17d76808d30239c75713
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:FeaturedAppRight
+Package:
+splice-amulet
+Acting Parties:
+temple-mainnet-1::1220f238bb79df3efbbac2ea964c3cd501003971a2cb59043e2dac50b06e85b8620f
+View Details
+#73
+Created
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:73
+Copied
+Contract ID:
+007a396191ee4b93dd34ac6124ae1c0416153d6b004414ab67b0905add1b6aaf5aca1212202a66370883351fe53e376062a22aea08399045adc3ab844e9399abe99550f1a4
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:FeaturedAppActivityMarker
+Package:
+splice-amulet
+Signatories:
+DSO::1220b1431ef217342db44d516bb9befde802be7d8899637d290895fa58880f19accc
+Observers:
+temple-mainnet-1::1220f238bb79df3efbbac2ea964c3cd501003971a2cb59043e2dac50b06e85b8620f
+View Details
+#74
+Exercised
+EventType_Allocation_Withdraw
+1 Child
+root event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:74
+Copied
+Contract ID:
+00dad05f13ec026f22acc290f4186f539b28a041d6f1a569233101c5cb97a9d44fca121220eac12de5da4db32d4bae4d8067910c7498a26421543904fd8b5dedf94a0657e4
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.AmuletAllocation:AmuletAllocation
+Package:
+splice-amulet
+Acting Parties:
+1ae7f51ef33ab95d67d06958fb8e9a07::12203b181a903f03452784c58b0b128742bbcca10be4712b9fb896fa3b7a865cb553
+View Details
+#75
+Exercised
+EventType_LockedAmulet_Unlock
+1 Child
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:75
+Copied
+Contract ID:
+0067c5030ff5c604846303517d4e6225c32c73610af6e01587298bcd08281afba2ca1212208eb77298110586081b2083916d749f7a2851ffc626082a9fafa84092e3d7ff18
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:LockedAmulet
+Package:
+splice-amulet
+Acting Parties:
+1ae7f51ef33ab95d67d06958fb8e9a07::12203b181a903f03452784c58b0b128742bbcca10be4712b9fb896fa3b7a865cb553
+
++1 more
+View Details
+#76
+Created
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:76
+Copied
+Contract ID:
+0059693027c681dc8af89aac8ad094ac6ccc4207548beade98e3a453095feb6cbbca1212202dbf26b8b30af670755dff7d344123ec5308f2fec31cfc0929eff21069f14fa6
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:Amulet
+Package:
+splice-amulet
+Signatories:
+1ae7f51ef33ab95d67d06958fb8e9a07::12203b181a903f03452784c58b0b128742bbcca10be4712b9fb896fa3b7a865cb553
+
++1 more
+View Details
+#77
+Exercised
+EventType_TransferFactory_Transfer
+1 Child
+root event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:77
+Copied
+Contract ID:
+004b73bef9a25d916efe93af46ed3808e2e486428e017b5718ba1c094d5f2424c6ca10122062968f770bf867cc90d77187118df923844f95b4e98fc1197acfdc09d956d8ce
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.ExternalPartyAmuletRules:ExternalPartyAmuletRules
+Package:
+splice-amulet
+Acting Parties:
+1ae7f51ef33ab95d67d06958fb8e9a07::12203b181a903f03452784c58b0b128742bbcca10be4712b9fb896fa3b7a865cb553
+View Details
+#78
+Exercised
+EventType_AmuletRules_Transfer
+2 Children
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:78
+Copied
+Contract ID:
+00e168f53e5fccfa2ea0efebf70181545c311e93f7881fda3b290f49bdf030f3bdca1212208bf48fbae38d98fa33c50487e0b954f30dd46ab61dda49b16b31d9660b3b99b2
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.AmuletRules:AmuletRules
+Package:
+splice-amulet
+Acting Parties:
+1ae7f51ef33ab95d67d06958fb8e9a07::12203b181a903f03452784c58b0b128742bbcca10be4712b9fb896fa3b7a865cb553
+View Details
+#79
+Exercised
+Archive
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:79
+Copied
+Contract ID:
+0059693027c681dc8af89aac8ad094ac6ccc4207548beade98e3a453095feb6cbbca1212202dbf26b8b30af670755dff7d344123ec5308f2fec31cfc0929eff21069f14fa6
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:Amulet
+Package:
+splice-amulet
+Acting Parties:
+1ae7f51ef33ab95d67d06958fb8e9a07::12203b181a903f03452784c58b0b128742bbcca10be4712b9fb896fa3b7a865cb553
+
++1 more
+View Details
+#80
+Created
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:80
+Copied
+Contract ID:
+00092f8ffdc3873d259c1871f8c5f95d433e82dbb4b4a8bf8eb0ae116714cb8bfdca121220cd9fb9f7c18a75640a0c31f90c86e816dcafa6dd013802d685aac196f779c13f
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:Amulet
+Package:
+splice-amulet
+Signatories:
+1ae7f51ef33ab95d67d06958fb8e9a07::12203b181a903f03452784c58b0b128742bbcca10be4712b9fb896fa3b7a865cb553
+
++1 more
+View Details
+#81
+Exercised
+EventType_AllocationFactory_Allocate
+3 Children
+root event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:81
+Copied
+Contract ID:
+004b73bef9a25d916efe93af46ed3808e2e486428e017b5718ba1c094d5f2424c6ca10122062968f770bf867cc90d77187118df923844f95b4e98fc1197acfdc09d956d8ce
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.ExternalPartyAmuletRules:ExternalPartyAmuletRules
+Package:
+splice-amulet
+Acting Parties:
+1ae7f51ef33ab95d67d06958fb8e9a07::12203b181a903f03452784c58b0b128742bbcca10be4712b9fb896fa3b7a865cb553
+View Details
+#82
+Exercised
+EventType_AmuletRules_ComputeFees
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:82
+Copied
+Contract ID:
+00e168f53e5fccfa2ea0efebf70181545c311e93f7881fda3b290f49bdf030f3bdca1212208bf48fbae38d98fa33c50487e0b954f30dd46ab61dda49b16b31d9660b3b99b2
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.AmuletRules:AmuletRules
+Package:
+splice-amulet
+Acting Parties:
+1ae7f51ef33ab95d67d06958fb8e9a07::12203b181a903f03452784c58b0b128742bbcca10be4712b9fb896fa3b7a865cb553
+View Details
+#83
+Exercised
+EventType_AmuletRules_Transfer
+2 Children
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:83
+Copied
+Contract ID:
+00e168f53e5fccfa2ea0efebf70181545c311e93f7881fda3b290f49bdf030f3bdca1212208bf48fbae38d98fa33c50487e0b954f30dd46ab61dda49b16b31d9660b3b99b2
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.AmuletRules:AmuletRules
+Package:
+splice-amulet
+Acting Parties:
+1ae7f51ef33ab95d67d06958fb8e9a07::12203b181a903f03452784c58b0b128742bbcca10be4712b9fb896fa3b7a865cb553
+
++1 more
+View Details
+#84
+Exercised
+Archive
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:84
+Copied
+Contract ID:
+00092f8ffdc3873d259c1871f8c5f95d433e82dbb4b4a8bf8eb0ae116714cb8bfdca121220cd9fb9f7c18a75640a0c31f90c86e816dcafa6dd013802d685aac196f779c13f
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:Amulet
+Package:
+splice-amulet
+Acting Parties:
+1ae7f51ef33ab95d67d06958fb8e9a07::12203b181a903f03452784c58b0b128742bbcca10be4712b9fb896fa3b7a865cb553
+
++1 more
+View Details
+#85
+Created
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:85
+Copied
+Contract ID:
+00872d6578af7f70d8547f1d12f9abdd127d3059ac2c2be6ca66ad3450b2817972ca1212200a85f0bdf5a3139b9229544230d08b298ffc0668122ee1db34a6ea51a186db8f
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:LockedAmulet
+Package:
+splice-amulet
+Signatories:
+1ae7f51ef33ab95d67d06958fb8e9a07::12203b181a903f03452784c58b0b128742bbcca10be4712b9fb896fa3b7a865cb553
+
++1 more
+View Details
+#86
+Created
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:86
+Copied
+Contract ID:
+00e03029f28fbb119f5dcf0cb5a7756e7fecf154bf62a67448e31f84e17162a17bca121220c0460d28c2bece7811852385fc4d045b097d63a0175a859038f4f08ce85018f0
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.AmuletAllocation:AmuletAllocation
+Package:
+splice-amulet
+Signatories:
+1ae7f51ef33ab95d67d06958fb8e9a07::12203b181a903f03452784c58b0b128742bbcca10be4712b9fb896fa3b7a865cb553
+
++1 more
+Observers:
+temple-mainnet-1::1220f238bb79df3efbbac2ea964c3cd501003971a2cb59043e2dac50b06e85b8620f
+View Details
+#87
+Exercised
+EventType_Allocation_ExecuteTransfer
+2 Children
+root event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:87
+Copied
+Contract ID:
+00e03029f28fbb119f5dcf0cb5a7756e7fecf154bf62a67448e31f84e17162a17bca121220c0460d28c2bece7811852385fc4d045b097d63a0175a859038f4f08ce85018f0
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.AmuletAllocation:AmuletAllocation
+Package:
+splice-amulet
+Acting Parties:
+1ae7f51ef33ab95d67d06958fb8e9a07::12203b181a903f03452784c58b0b128742bbcca10be4712b9fb896fa3b7a865cb553
+
++2 more
+View Details
+#88
+Exercised
+EventType_LockedAmulet_Unlock
+1 Child
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:88
+Copied
+Contract ID:
+00872d6578af7f70d8547f1d12f9abdd127d3059ac2c2be6ca66ad3450b2817972ca1212200a85f0bdf5a3139b9229544230d08b298ffc0668122ee1db34a6ea51a186db8f
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:LockedAmulet
+Package:
+splice-amulet
+Acting Parties:
+1ae7f51ef33ab95d67d06958fb8e9a07::12203b181a903f03452784c58b0b128742bbcca10be4712b9fb896fa3b7a865cb553
+
++1 more
+View Details
+#89
+Created
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:89
+Copied
+Contract ID:
+00892c0de99a351b90e1ec8fde1bce7026981b470959134de367cddc84a9584233ca1212205c94bbeb95c81030a5a575200c12570cf7b75099177d00ca6d52ea4c9246d7b0
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:Amulet
+Package:
+splice-amulet
+Signatories:
+1ae7f51ef33ab95d67d06958fb8e9a07::12203b181a903f03452784c58b0b128742bbcca10be4712b9fb896fa3b7a865cb553
+
++1 more
+View Details
+#90
+Exercised
+EventType_AmuletRules_Transfer
+3 Children
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:90
+Copied
+Contract ID:
+00e168f53e5fccfa2ea0efebf70181545c311e93f7881fda3b290f49bdf030f3bdca1212208bf48fbae38d98fa33c50487e0b954f30dd46ab61dda49b16b31d9660b3b99b2
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.AmuletRules:AmuletRules
+Package:
+splice-amulet
+Acting Parties:
+1ae7f51ef33ab95d67d06958fb8e9a07::12203b181a903f03452784c58b0b128742bbcca10be4712b9fb896fa3b7a865cb553
+
++2 more
+View Details
+#91
+Exercised
+Archive
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:91
+Copied
+Contract ID:
+00892c0de99a351b90e1ec8fde1bce7026981b470959134de367cddc84a9584233ca1212205c94bbeb95c81030a5a575200c12570cf7b75099177d00ca6d52ea4c9246d7b0
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:Amulet
+Package:
+splice-amulet
+Acting Parties:
+1ae7f51ef33ab95d67d06958fb8e9a07::12203b181a903f03452784c58b0b128742bbcca10be4712b9fb896fa3b7a865cb553
+
++1 more
+View Details
+#92
+Created
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:92
+Copied
+Contract ID:
+00bb7d325bcade8c32869c823704c74bf3b0e7fedc07762e5b7399bd0e7232a509ca121220fcb8434410f5de37fd5bac3f46f8f368fc02e7036bec1ed25dc83bb20f916d53
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:AppRewardCoupon
+Package:
+splice-amulet
+Signatories:
+DSO::1220b1431ef217342db44d516bb9befde802be7d8899637d290895fa58880f19accc
+Observers:
+temple-mainnet-1::1220f238bb79df3efbbac2ea964c3cd501003971a2cb59043e2dac50b06e85b8620f
+View Details
+#93
+Created
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:93
+Copied
+Contract ID:
+004111e5d869337ec22ec86ebce4a3529cceff462326bf08523bc9f827cb6f26feca12122079669363121d5d330fb45f94a1531fd7a1915c5652ac093017de524b83040e7b
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:Amulet
+Package:
+splice-amulet
+Signatories:
+DSO::1220b1431ef217342db44d516bb9befde802be7d8899637d290895fa58880f19accc
+
++1 more
+View Details
+#94
+Exercised
+EventType_FeaturedAppRight_CreateActivityMarker
+1 Child
+root event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:94
+Copied
+Contract ID:
+0012ec4c4b1fde3234437ea4e87f6e09f672ae5a9dd2ab2b93f19a65da1aafd8dbca111220efbebbc1ca3c63a0babbac1d566668d26117418670021cf2b9be29d24db0245e
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:FeaturedAppRight
+Package:
+splice-amulet
+Acting Parties:
+Bridge-Operator::1220c8448890a70e65f6906bd48d797ee6551f094e9e6a53e329fd5b2b549334f13f
+View Details
+#95
+Created
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:95
+Copied
+Contract ID:
+00365bde3996cb78a86892064bd1aa98f45303f1f7915a907754264cbe4ae1aba4ca1212207f7f8dd1d9294fee22fbe5811f676f89819d8537b49b285a865067648e0a71bd
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:FeaturedAppActivityMarker
+Package:
+splice-amulet
+Signatories:
+DSO::1220b1431ef217342db44d516bb9befde802be7d8899637d290895fa58880f19accc
+Observers:
+Bridge-Operator::1220c8448890a70e65f6906bd48d797ee6551f094e9e6a53e329fd5b2b549334f13f
+View Details
+#96
+Exercised
+EventType_FeaturedAppRight_CreateActivityMarker
+1 Child
+root event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:96
+Copied
+Contract ID:
+001bac86a228f209faad6e7a4adf40cd17b8aa7605f166333d640ad3f0c172eeb6ca111220da4eb40ed3d6f4521dcacf25d027c02f4bd0b9c561bc17d76808d30239c75713
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:FeaturedAppRight
+Package:
+splice-amulet
+Acting Parties:
+temple-mainnet-1::1220f238bb79df3efbbac2ea964c3cd501003971a2cb59043e2dac50b06e85b8620f
+View Details
+#97
+Created
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:97
+Copied
+Contract ID:
+0091e228276e23d4af0bdce7a48f6164c9ecfcca8362292636e9faf00337b413dbca121220463e4fe772c74dd74c502e515c300852804e06911a47ea4696b651d1db88e322
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:FeaturedAppActivityMarker
+Package:
+splice-amulet
+Signatories:
+DSO::1220b1431ef217342db44d516bb9befde802be7d8899637d290895fa58880f19accc
+Observers:
+temple-mainnet-1::1220f238bb79df3efbbac2ea964c3cd501003971a2cb59043e2dac50b06e85b8620f
+View Details
+#98
+Exercised
+EventType_Allocation_Withdraw
+1 Child
+root event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:98
+Copied
+Contract ID:
+00a37b3eb79109e22bfe74be186cb77baada21d8e87c87c39904b7a67965eabfcdca121220db8a44676388f55bfdfcdc3b9cdeff362e99a792d037deac0698f4fd4e4173d0
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.AmuletAllocation:AmuletAllocation
+Package:
+splice-amulet
+Acting Parties:
+8319d2f9fa3edf3e616342753ff39803::12200b0fdffb9516817053c2294a914d13ac5bc30d97c95e4a7c4497682f78e6654d
+View Details
+#99
+Exercised
+EventType_LockedAmulet_Unlock
+1 Child
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:99
+Copied
+Contract ID:
+0007468e8e6efbb1f15a624c0c314d4631fd43dbe55c324c6eb4db13fd585ec63fca121220509e1bf9725f804821eb9a18b70d6b9be01547fd38e95a3619d63284a72d1e16
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:LockedAmulet
+Package:
+splice-amulet
+Acting Parties:
+8319d2f9fa3edf3e616342753ff39803::12200b0fdffb9516817053c2294a914d13ac5bc30d97c95e4a7c4497682f78e6654d
+
++1 more
+View Details
+#100
+Created
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:100
+Copied
+Contract ID:
+00dba17b7c126b9d390c9f02501749514c8b749867180ec1613b490b23999e4766ca1212208f14ae10ec235247892530be644d1e37785f8b340eb7e7e043250162086e1842
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:Amulet
+Package:
+splice-amulet
+Signatories:
+8319d2f9fa3edf3e616342753ff39803::12200b0fdffb9516817053c2294a914d13ac5bc30d97c95e4a7c4497682f78e6654d
+
++1 more
+View Details
+#101
+Exercised
+EventType_TransferFactory_Transfer
+1 Child
+root event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:101
+Copied
+Contract ID:
+004b73bef9a25d916efe93af46ed3808e2e486428e017b5718ba1c094d5f2424c6ca10122062968f770bf867cc90d77187118df923844f95b4e98fc1197acfdc09d956d8ce
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.ExternalPartyAmuletRules:ExternalPartyAmuletRules
+Package:
+splice-amulet
+Acting Parties:
+8319d2f9fa3edf3e616342753ff39803::12200b0fdffb9516817053c2294a914d13ac5bc30d97c95e4a7c4497682f78e6654d
+View Details
+#102
+Exercised
+EventType_AmuletRules_Transfer
+2 Children
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:102
+Copied
+Contract ID:
+00e168f53e5fccfa2ea0efebf70181545c311e93f7881fda3b290f49bdf030f3bdca1212208bf48fbae38d98fa33c50487e0b954f30dd46ab61dda49b16b31d9660b3b99b2
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.AmuletRules:AmuletRules
+Package:
+splice-amulet
+Acting Parties:
+8319d2f9fa3edf3e616342753ff39803::12200b0fdffb9516817053c2294a914d13ac5bc30d97c95e4a7c4497682f78e6654d
+View Details
+#103
+Exercised
+Archive
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:103
+Copied
+Contract ID:
+00dba17b7c126b9d390c9f02501749514c8b749867180ec1613b490b23999e4766ca1212208f14ae10ec235247892530be644d1e37785f8b340eb7e7e043250162086e1842
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:Amulet
+Package:
+splice-amulet
+Acting Parties:
+8319d2f9fa3edf3e616342753ff39803::12200b0fdffb9516817053c2294a914d13ac5bc30d97c95e4a7c4497682f78e6654d
+
++1 more
+View Details
+#104
+Created
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:104
+Copied
+Contract ID:
+00b2bee6140ca7b39cd333044c8fa602699e68106974a8b5f96d97653613e1aa58ca12122004c6cfafbe99813a86d7005f612d9207d5184397afa41aca9287a044a7393025
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:Amulet
+Package:
+splice-amulet
+Signatories:
+8319d2f9fa3edf3e616342753ff39803::12200b0fdffb9516817053c2294a914d13ac5bc30d97c95e4a7c4497682f78e6654d
+
++1 more
+View Details
+#105
+Exercised
+EventType_AllocationFactory_Allocate
+3 Children
+root event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:105
+Copied
+Contract ID:
+004b73bef9a25d916efe93af46ed3808e2e486428e017b5718ba1c094d5f2424c6ca10122062968f770bf867cc90d77187118df923844f95b4e98fc1197acfdc09d956d8ce
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.ExternalPartyAmuletRules:ExternalPartyAmuletRules
+Package:
+splice-amulet
+Acting Parties:
+8319d2f9fa3edf3e616342753ff39803::12200b0fdffb9516817053c2294a914d13ac5bc30d97c95e4a7c4497682f78e6654d
+View Details
+#106
+Exercised
+EventType_AmuletRules_ComputeFees
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:106
+Copied
+Contract ID:
+00e168f53e5fccfa2ea0efebf70181545c311e93f7881fda3b290f49bdf030f3bdca1212208bf48fbae38d98fa33c50487e0b954f30dd46ab61dda49b16b31d9660b3b99b2
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.AmuletRules:AmuletRules
+Package:
+splice-amulet
+Acting Parties:
+8319d2f9fa3edf3e616342753ff39803::12200b0fdffb9516817053c2294a914d13ac5bc30d97c95e4a7c4497682f78e6654d
+View Details
+#107
+Exercised
+EventType_AmuletRules_Transfer
+2 Children
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:107
+Copied
+Contract ID:
+00e168f53e5fccfa2ea0efebf70181545c311e93f7881fda3b290f49bdf030f3bdca1212208bf48fbae38d98fa33c50487e0b954f30dd46ab61dda49b16b31d9660b3b99b2
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.AmuletRules:AmuletRules
+Package:
+splice-amulet
+Acting Parties:
+8319d2f9fa3edf3e616342753ff39803::12200b0fdffb9516817053c2294a914d13ac5bc30d97c95e4a7c4497682f78e6654d
+
++1 more
+View Details
+#108
+Exercised
+Archive
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:108
+Copied
+Contract ID:
+00b2bee6140ca7b39cd333044c8fa602699e68106974a8b5f96d97653613e1aa58ca12122004c6cfafbe99813a86d7005f612d9207d5184397afa41aca9287a044a7393025
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:Amulet
+Package:
+splice-amulet
+Acting Parties:
+8319d2f9fa3edf3e616342753ff39803::12200b0fdffb9516817053c2294a914d13ac5bc30d97c95e4a7c4497682f78e6654d
+
++1 more
+View Details
+#109
+Created
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:109
+Copied
+Contract ID:
+004fe6b92d4e8a6e4d62e32745e5791c1ac9179198fb5b4a6a052616890ac44643ca1212203d905bbb84b67239237e869cecd4bd0aefc4ab66a07f1389612d62d1090c543e
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:LockedAmulet
+Package:
+splice-amulet
+Signatories:
+8319d2f9fa3edf3e616342753ff39803::12200b0fdffb9516817053c2294a914d13ac5bc30d97c95e4a7c4497682f78e6654d
+
++1 more
+View Details
+#110
+Created
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:110
+Copied
+Contract ID:
+00d129a971d1db054ca033e51924904b5d1ec960391530c4f8bb06bf4a02892470ca121220b91b3834b7d3645d83d5cff0d49797a97d62167fe1b59037f4535f5b7d9793d2
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.AmuletAllocation:AmuletAllocation
+Package:
+splice-amulet
+Signatories:
+8319d2f9fa3edf3e616342753ff39803::12200b0fdffb9516817053c2294a914d13ac5bc30d97c95e4a7c4497682f78e6654d
+
++1 more
+Observers:
+temple-mainnet-1::1220f238bb79df3efbbac2ea964c3cd501003971a2cb59043e2dac50b06e85b8620f
+View Details
+#111
+Exercised
+EventType_Allocation_ExecuteTransfer
+2 Children
+root event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:111
+Copied
+Contract ID:
+00d129a971d1db054ca033e51924904b5d1ec960391530c4f8bb06bf4a02892470ca121220b91b3834b7d3645d83d5cff0d49797a97d62167fe1b59037f4535f5b7d9793d2
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.AmuletAllocation:AmuletAllocation
+Package:
+splice-amulet
+Acting Parties:
+8319d2f9fa3edf3e616342753ff39803::12200b0fdffb9516817053c2294a914d13ac5bc30d97c95e4a7c4497682f78e6654d
+
++2 more
+View Details
+#112
+Exercised
+EventType_LockedAmulet_Unlock
+1 Child
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:112
+Copied
+Contract ID:
+004fe6b92d4e8a6e4d62e32745e5791c1ac9179198fb5b4a6a052616890ac44643ca1212203d905bbb84b67239237e869cecd4bd0aefc4ab66a07f1389612d62d1090c543e
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:LockedAmulet
+Package:
+splice-amulet
+Acting Parties:
+8319d2f9fa3edf3e616342753ff39803::12200b0fdffb9516817053c2294a914d13ac5bc30d97c95e4a7c4497682f78e6654d
+
++1 more
+View Details
+#113
+Created
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:113
+Copied
+Contract ID:
+00993a8dfc42475bf58833ff2a9cb5ab734cd18557561e89b7141200d733784fa5ca12122042644651df0d8a9d1a36485d1f039cb4559cbd5ef3f9f4fae18e76ee769df229
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:Amulet
+Package:
+splice-amulet
+Signatories:
+8319d2f9fa3edf3e616342753ff39803::12200b0fdffb9516817053c2294a914d13ac5bc30d97c95e4a7c4497682f78e6654d
+
++1 more
+View Details
+#114
+Exercised
+EventType_AmuletRules_Transfer
+3 Children
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:114
+Copied
+Contract ID:
+00e168f53e5fccfa2ea0efebf70181545c311e93f7881fda3b290f49bdf030f3bdca1212208bf48fbae38d98fa33c50487e0b954f30dd46ab61dda49b16b31d9660b3b99b2
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.AmuletRules:AmuletRules
+Package:
+splice-amulet
+Acting Parties:
+8319d2f9fa3edf3e616342753ff39803::12200b0fdffb9516817053c2294a914d13ac5bc30d97c95e4a7c4497682f78e6654d
+
++2 more
+View Details
+#115
+Exercised
+Archive
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:115
+Copied
+Contract ID:
+00993a8dfc42475bf58833ff2a9cb5ab734cd18557561e89b7141200d733784fa5ca12122042644651df0d8a9d1a36485d1f039cb4559cbd5ef3f9f4fae18e76ee769df229
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:Amulet
+Package:
+splice-amulet
+Acting Parties:
+8319d2f9fa3edf3e616342753ff39803::12200b0fdffb9516817053c2294a914d13ac5bc30d97c95e4a7c4497682f78e6654d
+
++1 more
+View Details
+#116
+Created
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:116
+Copied
+Contract ID:
+008e230d8aa2c9980b5a5f2cf9b1f87270d1907f14fdaa46a90b1e215f865f55ebca12122023ddf46403db702ee7197e9a04ceeffb80f88f528b1ce873975987c4d97a5a9f
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:AppRewardCoupon
+Package:
+splice-amulet
+Signatories:
+DSO::1220b1431ef217342db44d516bb9befde802be7d8899637d290895fa58880f19accc
+Observers:
+temple-mainnet-1::1220f238bb79df3efbbac2ea964c3cd501003971a2cb59043e2dac50b06e85b8620f
+View Details
+#117
+Created
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:117
+Copied
+Contract ID:
+0011fff058bb4127098b0b74d389b4a9535832ac40cc348c69063ea4ea4d82ca9fca121220655bc6848213d13886fc37a56fa311428c3c4472d2b31203ff5a3d3166932130
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:Amulet
+Package:
+splice-amulet
+Signatories:
+DSO::1220b1431ef217342db44d516bb9befde802be7d8899637d290895fa58880f19accc
+
++1 more
+View Details
+#118
+Exercised
+EventType_FeaturedAppRight_CreateActivityMarker
+1 Child
+root event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:118
+Copied
+Contract ID:
+0012ec4c4b1fde3234437ea4e87f6e09f672ae5a9dd2ab2b93f19a65da1aafd8dbca111220efbebbc1ca3c63a0babbac1d566668d26117418670021cf2b9be29d24db0245e
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:FeaturedAppRight
+Package:
+splice-amulet
+Acting Parties:
+Bridge-Operator::1220c8448890a70e65f6906bd48d797ee6551f094e9e6a53e329fd5b2b549334f13f
+View Details
+#119
+Created
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:119
+Copied
+Contract ID:
+004ae746971d4dba2fa7904cadccda0d91624c7c30df1563f66752379cb4cab30bca1212207b4c7b6a5b54ba9c43606d4cd4d598df2cf7f0642d7b1173b7048404bc0c44d4
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:FeaturedAppActivityMarker
+Package:
+splice-amulet
+Signatories:
+DSO::1220b1431ef217342db44d516bb9befde802be7d8899637d290895fa58880f19accc
+Observers:
+Bridge-Operator::1220c8448890a70e65f6906bd48d797ee6551f094e9e6a53e329fd5b2b549334f13f
+View Details
+#120
+Exercised
+EventType_FeaturedAppRight_CreateActivityMarker
+1 Child
+root event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:120
+Copied
+Contract ID:
+001bac86a228f209faad6e7a4adf40cd17b8aa7605f166333d640ad3f0c172eeb6ca111220da4eb40ed3d6f4521dcacf25d027c02f4bd0b9c561bc17d76808d30239c75713
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:FeaturedAppRight
+Package:
+splice-amulet
+Acting Parties:
+temple-mainnet-1::1220f238bb79df3efbbac2ea964c3cd501003971a2cb59043e2dac50b06e85b8620f
+View Details
+#121
+Created
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:121
+Copied
+Contract ID:
+0098ac64f99856acd403bebb6f719df90761bb2f5d59187730b9ddbec0e580c1e2ca121220bf75b9b3db5c5cf2b529055453af1168867a55211a359f98052cef88671916bd
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:FeaturedAppActivityMarker
+Package:
+splice-amulet
+Signatories:
+DSO::1220b1431ef217342db44d516bb9befde802be7d8899637d290895fa58880f19accc
+Observers:
+temple-mainnet-1::1220f238bb79df3efbbac2ea964c3cd501003971a2cb59043e2dac50b06e85b8620f
+View Details
+#122
+Exercised
+EventType_Allocation_Withdraw
+1 Child
+root event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:122
+Copied
+Contract ID:
+00c3d3c692db8976cb7a51d18b9069bb2cebc06b69be32b2f06285c5cf4d0c6e43ca121220169eb583e064482c0c75df1f05a123793c73f17e5f8ebcc2792f72b1c0fd48b6
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.AmuletAllocation:AmuletAllocation
+Package:
+splice-amulet
+Acting Parties:
+9107bc44de4dcb521da5514cea8e2247::1220f1cfb5073c7f073d0571023269beee11b9d088cf86d66a49ec094507b263b5b3
+View Details
+#123
+Exercised
+EventType_LockedAmulet_Unlock
+1 Child
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:123
+Copied
+Contract ID:
+006a2abcdf819b84e2cb9a2609dde34085c26d57d841e207b929f12605c8af7b15ca1212205909da84f54342d3712893226dd5018aaa33f0f9097eed2fa558df6e0b4ab954
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:LockedAmulet
+Package:
+splice-amulet
+Acting Parties:
+9107bc44de4dcb521da5514cea8e2247::1220f1cfb5073c7f073d0571023269beee11b9d088cf86d66a49ec094507b263b5b3
+
++1 more
+View Details
+#124
+Created
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:124
+Copied
+Contract ID:
+0084a820aa6df2022d2724f9f4edbfe945ec3765d52ae1d00e7065eb76e9d0d933ca121220a731bc120218ae297e58665775a049c3177eb6e310978d4d326cb2ff89f96244
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:Amulet
+Package:
+splice-amulet
+Signatories:
+9107bc44de4dcb521da5514cea8e2247::1220f1cfb5073c7f073d0571023269beee11b9d088cf86d66a49ec094507b263b5b3
+
++1 more
+View Details
+#125
+Exercised
+EventType_TransferFactory_Transfer
+1 Child
+root event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:125
+Copied
+Contract ID:
+004b73bef9a25d916efe93af46ed3808e2e486428e017b5718ba1c094d5f2424c6ca10122062968f770bf867cc90d77187118df923844f95b4e98fc1197acfdc09d956d8ce
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.ExternalPartyAmuletRules:ExternalPartyAmuletRules
+Package:
+splice-amulet
+Acting Parties:
+9107bc44de4dcb521da5514cea8e2247::1220f1cfb5073c7f073d0571023269beee11b9d088cf86d66a49ec094507b263b5b3
+View Details
+#126
+Exercised
+EventType_AmuletRules_Transfer
+2 Children
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:126
+Copied
+Contract ID:
+00e168f53e5fccfa2ea0efebf70181545c311e93f7881fda3b290f49bdf030f3bdca1212208bf48fbae38d98fa33c50487e0b954f30dd46ab61dda49b16b31d9660b3b99b2
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.AmuletRules:AmuletRules
+Package:
+splice-amulet
+Acting Parties:
+9107bc44de4dcb521da5514cea8e2247::1220f1cfb5073c7f073d0571023269beee11b9d088cf86d66a49ec094507b263b5b3
+View Details
+#127
+Exercised
+Archive
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:127
+Copied
+Contract ID:
+0084a820aa6df2022d2724f9f4edbfe945ec3765d52ae1d00e7065eb76e9d0d933ca121220a731bc120218ae297e58665775a049c3177eb6e310978d4d326cb2ff89f96244
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:Amulet
+Package:
+splice-amulet
+Acting Parties:
+9107bc44de4dcb521da5514cea8e2247::1220f1cfb5073c7f073d0571023269beee11b9d088cf86d66a49ec094507b263b5b3
+
++1 more
+View Details
+#128
+Created
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:128
+Copied
+Contract ID:
+009544a991f1f9ff7e02ee7d9801eee6e2bed4d3412a347e42c91bfcbf2a923bc8ca1212208f051d762f4e0b1c473cd42a6112b3b0f59847adfb2b7c2d5b063dd82b198b8b
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:Amulet
+Package:
+splice-amulet
+Signatories:
+9107bc44de4dcb521da5514cea8e2247::1220f1cfb5073c7f073d0571023269beee11b9d088cf86d66a49ec094507b263b5b3
+
++1 more
+View Details
+#129
+Exercised
+EventType_AllocationFactory_Allocate
+3 Children
+root event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:129
+Copied
+Contract ID:
+004b73bef9a25d916efe93af46ed3808e2e486428e017b5718ba1c094d5f2424c6ca10122062968f770bf867cc90d77187118df923844f95b4e98fc1197acfdc09d956d8ce
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.ExternalPartyAmuletRules:ExternalPartyAmuletRules
+Package:
+splice-amulet
+Acting Parties:
+9107bc44de4dcb521da5514cea8e2247::1220f1cfb5073c7f073d0571023269beee11b9d088cf86d66a49ec094507b263b5b3
+View Details
+#130
+Exercised
+EventType_AmuletRules_ComputeFees
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:130
+Copied
+Contract ID:
+00e168f53e5fccfa2ea0efebf70181545c311e93f7881fda3b290f49bdf030f3bdca1212208bf48fbae38d98fa33c50487e0b954f30dd46ab61dda49b16b31d9660b3b99b2
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.AmuletRules:AmuletRules
+Package:
+splice-amulet
+Acting Parties:
+9107bc44de4dcb521da5514cea8e2247::1220f1cfb5073c7f073d0571023269beee11b9d088cf86d66a49ec094507b263b5b3
+View Details
+#131
+Exercised
+EventType_AmuletRules_Transfer
+2 Children
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:131
+Copied
+Contract ID:
+00e168f53e5fccfa2ea0efebf70181545c311e93f7881fda3b290f49bdf030f3bdca1212208bf48fbae38d98fa33c50487e0b954f30dd46ab61dda49b16b31d9660b3b99b2
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.AmuletRules:AmuletRules
+Package:
+splice-amulet
+Acting Parties:
+9107bc44de4dcb521da5514cea8e2247::1220f1cfb5073c7f073d0571023269beee11b9d088cf86d66a49ec094507b263b5b3
+
++1 more
+View Details
+#132
+Exercised
+Archive
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:132
+Copied
+Contract ID:
+009544a991f1f9ff7e02ee7d9801eee6e2bed4d3412a347e42c91bfcbf2a923bc8ca1212208f051d762f4e0b1c473cd42a6112b3b0f59847adfb2b7c2d5b063dd82b198b8b
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:Amulet
+Package:
+splice-amulet
+Acting Parties:
+9107bc44de4dcb521da5514cea8e2247::1220f1cfb5073c7f073d0571023269beee11b9d088cf86d66a49ec094507b263b5b3
+
++1 more
+View Details
+#133
+Created
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:133
+Copied
+Contract ID:
+00563b72314c37ffc21cf4b87770a1b7d784195a033ef3763b18750d374a0fe74dca121220ce85c3c8fe3bfcf4dbc4cf341f9af943b3c41d8cb6e6e475fe28844041157db3
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:LockedAmulet
+Package:
+splice-amulet
+Signatories:
+9107bc44de4dcb521da5514cea8e2247::1220f1cfb5073c7f073d0571023269beee11b9d088cf86d66a49ec094507b263b5b3
+
++1 more
+View Details
+#134
+Created
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:134
+Copied
+Contract ID:
+00fcebe46cd7139dd7210f2f75f2e68d48fd4f30edb8fbac2c14f3d92d8deafd42ca1212208f0f26a5db6b2c08d6daf7ed92cf51291cf19bdc30011a128f342e6157a845fb
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.AmuletAllocation:AmuletAllocation
+Package:
+splice-amulet
+Signatories:
+9107bc44de4dcb521da5514cea8e2247::1220f1cfb5073c7f073d0571023269beee11b9d088cf86d66a49ec094507b263b5b3
+
++1 more
+Observers:
+temple-mainnet-1::1220f238bb79df3efbbac2ea964c3cd501003971a2cb59043e2dac50b06e85b8620f
+View Details
+#135
+Exercised
+EventType_Allocation_ExecuteTransfer
+2 Children
+root event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:135
+Copied
+Contract ID:
+00fcebe46cd7139dd7210f2f75f2e68d48fd4f30edb8fbac2c14f3d92d8deafd42ca1212208f0f26a5db6b2c08d6daf7ed92cf51291cf19bdc30011a128f342e6157a845fb
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.AmuletAllocation:AmuletAllocation
+Package:
+splice-amulet
+Acting Parties:
+9107bc44de4dcb521da5514cea8e2247::1220f1cfb5073c7f073d0571023269beee11b9d088cf86d66a49ec094507b263b5b3
+
++2 more
+View Details
+#136
+Exercised
+EventType_LockedAmulet_Unlock
+1 Child
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:136
+Copied
+Contract ID:
+00563b72314c37ffc21cf4b87770a1b7d784195a033ef3763b18750d374a0fe74dca121220ce85c3c8fe3bfcf4dbc4cf341f9af943b3c41d8cb6e6e475fe28844041157db3
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:LockedAmulet
+Package:
+splice-amulet
+Acting Parties:
+9107bc44de4dcb521da5514cea8e2247::1220f1cfb5073c7f073d0571023269beee11b9d088cf86d66a49ec094507b263b5b3
+
++1 more
+View Details
+#137
+Created
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:137
+Copied
+Contract ID:
+00388cd2bb67b3fa9df27b92d7b2ecde4ca5c0fe5ee836a17598aeff7564bfd642ca121220d393df751fe19e37fa3c44bb4299d79f3b2cd930fa2bad79323d130d72747c2f
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:Amulet
+Package:
+splice-amulet
+Signatories:
+9107bc44de4dcb521da5514cea8e2247::1220f1cfb5073c7f073d0571023269beee11b9d088cf86d66a49ec094507b263b5b3
+
++1 more
+View Details
+#138
+Exercised
+EventType_AmuletRules_Transfer
+3 Children
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:138
+Copied
+Contract ID:
+00e168f53e5fccfa2ea0efebf70181545c311e93f7881fda3b290f49bdf030f3bdca1212208bf48fbae38d98fa33c50487e0b954f30dd46ab61dda49b16b31d9660b3b99b2
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.AmuletRules:AmuletRules
+Package:
+splice-amulet
+Acting Parties:
+9107bc44de4dcb521da5514cea8e2247::1220f1cfb5073c7f073d0571023269beee11b9d088cf86d66a49ec094507b263b5b3
+
++2 more
+View Details
+#139
+Exercised
+Archive
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:139
+Copied
+Contract ID:
+00388cd2bb67b3fa9df27b92d7b2ecde4ca5c0fe5ee836a17598aeff7564bfd642ca121220d393df751fe19e37fa3c44bb4299d79f3b2cd930fa2bad79323d130d72747c2f
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:Amulet
+Package:
+splice-amulet
+Acting Parties:
+9107bc44de4dcb521da5514cea8e2247::1220f1cfb5073c7f073d0571023269beee11b9d088cf86d66a49ec094507b263b5b3
+
++1 more
+View Details
+#140
+Created
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:140
+Copied
+Contract ID:
+00c1a9f4a91f71f4b659f60acf94f06db358292fa317f3f2e0ac2f6dd7fd028257ca12122017b9d972f14691748664c41cea992f963efe2469464b3e25b206e264be957640
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:AppRewardCoupon
+Package:
+splice-amulet
+Signatories:
+DSO::1220b1431ef217342db44d516bb9befde802be7d8899637d290895fa58880f19accc
+Observers:
+temple-mainnet-1::1220f238bb79df3efbbac2ea964c3cd501003971a2cb59043e2dac50b06e85b8620f
+View Details
+#141
+Created
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:141
+Copied
+Contract ID:
+00d5c5d7c3ee436725871980e27143aa44d78159c7cbeb4a12a1417b3a2bd54896ca12122040dfc916172a1d92903762cbe8abc754b4875f273ab9679b4c2a79a366a0c5aa
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:Amulet
+Package:
+splice-amulet
+Signatories:
+DSO::1220b1431ef217342db44d516bb9befde802be7d8899637d290895fa58880f19accc
+
++1 more
+View Details
+#142
+Exercised
+EventType_FeaturedAppRight_CreateActivityMarker
+1 Child
+root event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:142
+Copied
+Contract ID:
+0012ec4c4b1fde3234437ea4e87f6e09f672ae5a9dd2ab2b93f19a65da1aafd8dbca111220efbebbc1ca3c63a0babbac1d566668d26117418670021cf2b9be29d24db0245e
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:FeaturedAppRight
+Package:
+splice-amulet
+Acting Parties:
+Bridge-Operator::1220c8448890a70e65f6906bd48d797ee6551f094e9e6a53e329fd5b2b549334f13f
+View Details
+#143
+Created
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:143
+Copied
+Contract ID:
+00622919f4fb63921d427edbd78c40847342f4af4aeaff30a0d46bd992bddb1a67ca121220655ae695872acefcd51acb3610564954c6a92fdfba0da08060ef087d316451ab
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:FeaturedAppActivityMarker
+Package:
+splice-amulet
+Signatories:
+DSO::1220b1431ef217342db44d516bb9befde802be7d8899637d290895fa58880f19accc
+Observers:
+Bridge-Operator::1220c8448890a70e65f6906bd48d797ee6551f094e9e6a53e329fd5b2b549334f13f
+View Details
+#144
+Exercised
+EventType_FeaturedAppRight_CreateActivityMarker
+1 Child
+root event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:144
+Copied
+Contract ID:
+001bac86a228f209faad6e7a4adf40cd17b8aa7605f166333d640ad3f0c172eeb6ca111220da4eb40ed3d6f4521dcacf25d027c02f4bd0b9c561bc17d76808d30239c75713
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:FeaturedAppRight
+Package:
+splice-amulet
+Acting Parties:
+temple-mainnet-1::1220f238bb79df3efbbac2ea964c3cd501003971a2cb59043e2dac50b06e85b8620f
+View Details
+#145
+Created
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:145
+Copied
+Contract ID:
+00de1ebada5737dec9eef8f8cfcc6f62fb0cf9143754884a25319d94b35a3a0bcdca121220c1d68b54e57d385d99540aa980ba6b5176a3d2d3407b794d6e94b6b4c681ba83
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:FeaturedAppActivityMarker
+Package:
+splice-amulet
+Signatories:
+DSO::1220b1431ef217342db44d516bb9befde802be7d8899637d290895fa58880f19accc
+Observers:
+temple-mainnet-1::1220f238bb79df3efbbac2ea964c3cd501003971a2cb59043e2dac50b06e85b8620f
+View Details
+#146
+Exercised
+EventType_Allocation_Withdraw
+1 Child
+root event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:146
+Copied
+Contract ID:
+005be3c8f3a17587ff7e77e116ceda8c85a7572548ed74b7785d20d64eaad889deca121220735a05029689fa5bedc6bda0121fdd5ebcfb89f8abdff87c3e7a84bcd6e0a761
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.AmuletAllocation:AmuletAllocation
+Package:
+splice-amulet
+Acting Parties:
+e3b137e85393d675ee20f95cbdc74035::122044fbdc5d351c0e5245384b5d852d96c7ef61e7159477ef247e03accecc5e593b
+View Details
+#147
+Exercised
+EventType_LockedAmulet_Unlock
+1 Child
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:147
+Copied
+Contract ID:
+0059af4501b0d5323569909d61bf8e19312fca63979d8b5e9cc8487bc0b81eda38ca121220ecccaeb52cf8a03800a04b559f1f5c3feb62602f0d6ad54702c421ab032a086a
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:LockedAmulet
+Package:
+splice-amulet
+Acting Parties:
+DSO::1220b1431ef217342db44d516bb9befde802be7d8899637d290895fa58880f19accc
+
++1 more
+View Details
+#148
+Created
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:148
+Copied
+Contract ID:
+0087805afa65a7aac515fc457aad33fcf337af9f74897f0c0ab1b0085d5853c0cdca1212202460a93ceb0e4d419df526fba6a120bdd78a0cbcc94050d760083b68fcc57ed8
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:Amulet
+Package:
+splice-amulet
+Signatories:
+DSO::1220b1431ef217342db44d516bb9befde802be7d8899637d290895fa58880f19accc
+
++1 more
+View Details
+#149
+Exercised
+EventType_TransferFactory_Transfer
+1 Child
+root event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:149
+Copied
+Contract ID:
+004b73bef9a25d916efe93af46ed3808e2e486428e017b5718ba1c094d5f2424c6ca10122062968f770bf867cc90d77187118df923844f95b4e98fc1197acfdc09d956d8ce
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.ExternalPartyAmuletRules:ExternalPartyAmuletRules
+Package:
+splice-amulet
+Acting Parties:
+e3b137e85393d675ee20f95cbdc74035::122044fbdc5d351c0e5245384b5d852d96c7ef61e7159477ef247e03accecc5e593b
+View Details
+#150
+Exercised
+EventType_AmuletRules_Transfer
+2 Children
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:150
+Copied
+Contract ID:
+00e168f53e5fccfa2ea0efebf70181545c311e93f7881fda3b290f49bdf030f3bdca1212208bf48fbae38d98fa33c50487e0b954f30dd46ab61dda49b16b31d9660b3b99b2
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.AmuletRules:AmuletRules
+Package:
+splice-amulet
+Acting Parties:
+e3b137e85393d675ee20f95cbdc74035::122044fbdc5d351c0e5245384b5d852d96c7ef61e7159477ef247e03accecc5e593b
+View Details
+#151
+Exercised
+Archive
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:151
+Copied
+Contract ID:
+0087805afa65a7aac515fc457aad33fcf337af9f74897f0c0ab1b0085d5853c0cdca1212202460a93ceb0e4d419df526fba6a120bdd78a0cbcc94050d760083b68fcc57ed8
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:Amulet
+Package:
+splice-amulet
+Acting Parties:
+DSO::1220b1431ef217342db44d516bb9befde802be7d8899637d290895fa58880f19accc
+
++1 more
+View Details
+#152
+Created
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:152
+Copied
+Contract ID:
+0000922522e65ffbb6985b85f61961e2c646a4af5ed3c02c7e39a5c6f4003eb2caca12122097781380ef9574573051ca49572d7ddcff8634e1d7a842674d9dc33a4d4ff597
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:Amulet
+Package:
+splice-amulet
+Signatories:
+DSO::1220b1431ef217342db44d516bb9befde802be7d8899637d290895fa58880f19accc
+
++1 more
+View Details
+#153
+Exercised
+EventType_AllocationFactory_Allocate
+3 Children
+root event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:153
+Copied
+Contract ID:
+004b73bef9a25d916efe93af46ed3808e2e486428e017b5718ba1c094d5f2424c6ca10122062968f770bf867cc90d77187118df923844f95b4e98fc1197acfdc09d956d8ce
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.ExternalPartyAmuletRules:ExternalPartyAmuletRules
+Package:
+splice-amulet
+Acting Parties:
+e3b137e85393d675ee20f95cbdc74035::122044fbdc5d351c0e5245384b5d852d96c7ef61e7159477ef247e03accecc5e593b
+View Details
+#154
+Exercised
+EventType_AmuletRules_ComputeFees
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:154
+Copied
+Contract ID:
+00e168f53e5fccfa2ea0efebf70181545c311e93f7881fda3b290f49bdf030f3bdca1212208bf48fbae38d98fa33c50487e0b954f30dd46ab61dda49b16b31d9660b3b99b2
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.AmuletRules:AmuletRules
+Package:
+splice-amulet
+Acting Parties:
+e3b137e85393d675ee20f95cbdc74035::122044fbdc5d351c0e5245384b5d852d96c7ef61e7159477ef247e03accecc5e593b
+View Details
+#155
+Exercised
+EventType_AmuletRules_Transfer
+2 Children
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:155
+Copied
+Contract ID:
+00e168f53e5fccfa2ea0efebf70181545c311e93f7881fda3b290f49bdf030f3bdca1212208bf48fbae38d98fa33c50487e0b954f30dd46ab61dda49b16b31d9660b3b99b2
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.AmuletRules:AmuletRules
+Package:
+splice-amulet
+Acting Parties:
+DSO::1220b1431ef217342db44d516bb9befde802be7d8899637d290895fa58880f19accc
+
++1 more
+View Details
+#156
+Exercised
+Archive
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:156
+Copied
+Contract ID:
+0000922522e65ffbb6985b85f61961e2c646a4af5ed3c02c7e39a5c6f4003eb2caca12122097781380ef9574573051ca49572d7ddcff8634e1d7a842674d9dc33a4d4ff597
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:Amulet
+Package:
+splice-amulet
+Acting Parties:
+DSO::1220b1431ef217342db44d516bb9befde802be7d8899637d290895fa58880f19accc
+
++1 more
+View Details
+#157
+Created
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:157
+Copied
+Contract ID:
+002814639ccd388fa32735371873b75f089ef812810347d85ab1e99684b18fb479ca121220f84bd4a45d49850a77aac0bf69e05a36fa69143c0367ce056d733270edd2dc77
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:LockedAmulet
+Package:
+splice-amulet
+Signatories:
+DSO::1220b1431ef217342db44d516bb9befde802be7d8899637d290895fa58880f19accc
+
++1 more
+View Details
+#158
+Created
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:158
+Copied
+Contract ID:
+001c1ac950dc7a81aaf4ef35d1289ff200e86d746042b468fa73050a6d1c36846bca121220fbd6046c4b134a08db5cc354f38cdef7046c95e5da8ce53a0045447e946ed7bb
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.AmuletAllocation:AmuletAllocation
+Package:
+splice-amulet
+Signatories:
+DSO::1220b1431ef217342db44d516bb9befde802be7d8899637d290895fa58880f19accc
+
++1 more
+Observers:
+temple-mainnet-1::1220f238bb79df3efbbac2ea964c3cd501003971a2cb59043e2dac50b06e85b8620f
+View Details
+#159
+Exercised
+EventType_Allocation_ExecuteTransfer
+2 Children
+root event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:159
+Copied
+Contract ID:
+001c1ac950dc7a81aaf4ef35d1289ff200e86d746042b468fa73050a6d1c36846bca121220fbd6046c4b134a08db5cc354f38cdef7046c95e5da8ce53a0045447e946ed7bb
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.AmuletAllocation:AmuletAllocation
+Package:
+splice-amulet
+Acting Parties:
+e3b137e85393d675ee20f95cbdc74035::122044fbdc5d351c0e5245384b5d852d96c7ef61e7159477ef247e03accecc5e593b
+
++2 more
+View Details
+#160
+Exercised
+EventType_LockedAmulet_Unlock
+1 Child
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:160
+Copied
+Contract ID:
+002814639ccd388fa32735371873b75f089ef812810347d85ab1e99684b18fb479ca121220f84bd4a45d49850a77aac0bf69e05a36fa69143c0367ce056d733270edd2dc77
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:LockedAmulet
+Package:
+splice-amulet
+Acting Parties:
+DSO::1220b1431ef217342db44d516bb9befde802be7d8899637d290895fa58880f19accc
+
++1 more
+View Details
+#161
+Created
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:161
+Copied
+Contract ID:
+00b20eceb96d6d2cc0dabfc3edeffe7a70f7a414ba8da18633c4eb8c73a6ec2a4cca12122063919419023a088fcf58529e237ec5ea31b3453855ff6902437a28b05df0a684
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:Amulet
+Package:
+splice-amulet
+Signatories:
+DSO::1220b1431ef217342db44d516bb9befde802be7d8899637d290895fa58880f19accc
+
++1 more
+View Details
+#162
+Exercised
+EventType_AmuletRules_Transfer
+3 Children
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:162
+Copied
+Contract ID:
+00e168f53e5fccfa2ea0efebf70181545c311e93f7881fda3b290f49bdf030f3bdca1212208bf48fbae38d98fa33c50487e0b954f30dd46ab61dda49b16b31d9660b3b99b2
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.AmuletRules:AmuletRules
+Package:
+splice-amulet
+Acting Parties:
+e3b137e85393d675ee20f95cbdc74035::122044fbdc5d351c0e5245384b5d852d96c7ef61e7159477ef247e03accecc5e593b
+
++2 more
+View Details
+#163
+Exercised
+Archive
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:163
+Copied
+Contract ID:
+00b20eceb96d6d2cc0dabfc3edeffe7a70f7a414ba8da18633c4eb8c73a6ec2a4cca12122063919419023a088fcf58529e237ec5ea31b3453855ff6902437a28b05df0a684
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:Amulet
+Package:
+splice-amulet
+Acting Parties:
+DSO::1220b1431ef217342db44d516bb9befde802be7d8899637d290895fa58880f19accc
+
++1 more
+View Details
+#164
+Created
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:164
+Copied
+Contract ID:
+00e46d2e71dce22ec6bbf16791c27a87062a4c2cbfd4be0c913cba1fa1f8b334d8ca121220bce529b13bb5cbfee4a9bae022c7d0d97d388136c3f7a6228a0cd83e45adc8ca
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:AppRewardCoupon
+Package:
+splice-amulet
+Signatories:
+DSO::1220b1431ef217342db44d516bb9befde802be7d8899637d290895fa58880f19accc
+Observers:
+temple-mainnet-1::1220f238bb79df3efbbac2ea964c3cd501003971a2cb59043e2dac50b06e85b8620f
+View Details
+#165
+Created
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:165
+Copied
+Contract ID:
+004bd3e2fe1bccfa8445ceb926759bc19775cfa8553c5d8dced7c643f08ccf14ceca1212209b1cf285694f983e1acc3a54c3487c7ab0f2c260630b931dd7e873d1068ed97f
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:Amulet
+Package:
+splice-amulet
+Signatories:
+DSO::1220b1431ef217342db44d516bb9befde802be7d8899637d290895fa58880f19accc
+
++1 more
+View Details
+#166
+Exercised
+EventType_FeaturedAppRight_CreateActivityMarker
+1 Child
+root event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:166
+Copied
+Contract ID:
+0012ec4c4b1fde3234437ea4e87f6e09f672ae5a9dd2ab2b93f19a65da1aafd8dbca111220efbebbc1ca3c63a0babbac1d566668d26117418670021cf2b9be29d24db0245e
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:FeaturedAppRight
+Package:
+splice-amulet
+Acting Parties:
+Bridge-Operator::1220c8448890a70e65f6906bd48d797ee6551f094e9e6a53e329fd5b2b549334f13f
+View Details
+#167
+Created
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:167
+Copied
+Contract ID:
+009119d1b30d61f5b67b83058b2daf2d1c19ec546d826444af81e6faa9cbca2c89ca1212205021291609c80323deed52ae39077fd36034fc3a2de6e9d19a94384984bd0241
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:FeaturedAppActivityMarker
+Package:
+splice-amulet
+Signatories:
+DSO::1220b1431ef217342db44d516bb9befde802be7d8899637d290895fa58880f19accc
+Observers:
+Bridge-Operator::1220c8448890a70e65f6906bd48d797ee6551f094e9e6a53e329fd5b2b549334f13f
+View Details
+#168
+Exercised
+EventType_FeaturedAppRight_CreateActivityMarker
+1 Child
+root event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:168
+Copied
+Contract ID:
+001bac86a228f209faad6e7a4adf40cd17b8aa7605f166333d640ad3f0c172eeb6ca111220da4eb40ed3d6f4521dcacf25d027c02f4bd0b9c561bc17d76808d30239c75713
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:FeaturedAppRight
+Package:
+splice-amulet
+Acting Parties:
+temple-mainnet-1::1220f238bb79df3efbbac2ea964c3cd501003971a2cb59043e2dac50b06e85b8620f
+View Details
+#169
+Created
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:169
+Copied
+Contract ID:
+00a4e1fa07063cc2378ef6829da73d53501b00aa163af0f14d3ce36da09907eb6aca12122097b8127bac757ed152cdf320465a4326424ced31f816e503b970338119def1c0
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:FeaturedAppActivityMarker
+Package:
+splice-amulet
+Signatories:
+DSO::1220b1431ef217342db44d516bb9befde802be7d8899637d290895fa58880f19accc
+Observers:
+temple-mainnet-1::1220f238bb79df3efbbac2ea964c3cd501003971a2cb59043e2dac50b06e85b8620f
+View Details
+#170
+Exercised
+EventType_Allocation_Withdraw
+1 Child
+root event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:170
+Copied
+Contract ID:
+0093f71c71f8705a3e6c316ebc722078d346e2d01eeb738decaefcd57932ec300dca121220240982ec787e7116e2c2a164f67c8301920056e06879ef971cb9a3293ba633ad
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.AmuletAllocation:AmuletAllocation
+Package:
+splice-amulet
+Acting Parties:
+87828d759448a98d3e16f77c23f9bb67::12205b73b361fe7af064d79399f6ab59fa0eadff9a5f15c436ff915225eac4b338ef
+View Details
+#171
+Exercised
+EventType_LockedAmulet_Unlock
+1 Child
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:171
+Copied
+Contract ID:
+003c11c751a6a03dade42135768ca83b1e23f9ef4e8ad5f44d11cedc1b23f0ec3aca121220e187ff5c2a7c12558e864c014c6a8c77b1f9ce7d0f93c8e9f8009254310a8308
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:LockedAmulet
+Package:
+splice-amulet
+Acting Parties:
+87828d759448a98d3e16f77c23f9bb67::12205b73b361fe7af064d79399f6ab59fa0eadff9a5f15c436ff915225eac4b338ef
+
++1 more
+View Details
+#172
+Created
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:172
+Copied
+Contract ID:
+006aba5d3968f323cd0b027cb014a2982571f404184176a02ee0a9c1208849d165ca121220437ba099708223ef3758db1adb6cfbe0883ae088d87944a3f1753ad61b8fb0f7
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:Amulet
+Package:
+splice-amulet
+Signatories:
+87828d759448a98d3e16f77c23f9bb67::12205b73b361fe7af064d79399f6ab59fa0eadff9a5f15c436ff915225eac4b338ef
+
++1 more
+View Details
+#173
+Exercised
+EventType_TransferFactory_Transfer
+1 Child
+root event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:173
+Copied
+Contract ID:
+004b73bef9a25d916efe93af46ed3808e2e486428e017b5718ba1c094d5f2424c6ca10122062968f770bf867cc90d77187118df923844f95b4e98fc1197acfdc09d956d8ce
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.ExternalPartyAmuletRules:ExternalPartyAmuletRules
+Package:
+splice-amulet
+Acting Parties:
+87828d759448a98d3e16f77c23f9bb67::12205b73b361fe7af064d79399f6ab59fa0eadff9a5f15c436ff915225eac4b338ef
+View Details
+#174
+Exercised
+EventType_AmuletRules_Transfer
+2 Children
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:174
+Copied
+Contract ID:
+00e168f53e5fccfa2ea0efebf70181545c311e93f7881fda3b290f49bdf030f3bdca1212208bf48fbae38d98fa33c50487e0b954f30dd46ab61dda49b16b31d9660b3b99b2
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.AmuletRules:AmuletRules
+Package:
+splice-amulet
+Acting Parties:
+87828d759448a98d3e16f77c23f9bb67::12205b73b361fe7af064d79399f6ab59fa0eadff9a5f15c436ff915225eac4b338ef
+View Details
+#175
+Exercised
+Archive
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:175
+Copied
+Contract ID:
+006aba5d3968f323cd0b027cb014a2982571f404184176a02ee0a9c1208849d165ca121220437ba099708223ef3758db1adb6cfbe0883ae088d87944a3f1753ad61b8fb0f7
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:Amulet
+Package:
+splice-amulet
+Acting Parties:
+87828d759448a98d3e16f77c23f9bb67::12205b73b361fe7af064d79399f6ab59fa0eadff9a5f15c436ff915225eac4b338ef
+
++1 more
+View Details
+#176
+Created
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:176
+Copied
+Contract ID:
+0080ed7a805c25243342348fb4e8eb8f79fe79dade66da38650ff8881f015fe419ca121220171b2e87656ba7bfc3bbb152a2bace015ef4f600fc2c55909e09087c0432dd28
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:Amulet
+Package:
+splice-amulet
+Signatories:
+87828d759448a98d3e16f77c23f9bb67::12205b73b361fe7af064d79399f6ab59fa0eadff9a5f15c436ff915225eac4b338ef
+
++1 more
+View Details
+#177
+Exercised
+EventType_AllocationFactory_Allocate
+3 Children
+root event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:177
+Copied
+Contract ID:
+004b73bef9a25d916efe93af46ed3808e2e486428e017b5718ba1c094d5f2424c6ca10122062968f770bf867cc90d77187118df923844f95b4e98fc1197acfdc09d956d8ce
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.ExternalPartyAmuletRules:ExternalPartyAmuletRules
+Package:
+splice-amulet
+Acting Parties:
+87828d759448a98d3e16f77c23f9bb67::12205b73b361fe7af064d79399f6ab59fa0eadff9a5f15c436ff915225eac4b338ef
+View Details
+#178
+Exercised
+EventType_AmuletRules_ComputeFees
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:178
+Copied
+Contract ID:
+00e168f53e5fccfa2ea0efebf70181545c311e93f7881fda3b290f49bdf030f3bdca1212208bf48fbae38d98fa33c50487e0b954f30dd46ab61dda49b16b31d9660b3b99b2
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.AmuletRules:AmuletRules
+Package:
+splice-amulet
+Acting Parties:
+87828d759448a98d3e16f77c23f9bb67::12205b73b361fe7af064d79399f6ab59fa0eadff9a5f15c436ff915225eac4b338ef
+View Details
+#179
+Exercised
+EventType_AmuletRules_Transfer
+2 Children
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:179
+Copied
+Contract ID:
+00e168f53e5fccfa2ea0efebf70181545c311e93f7881fda3b290f49bdf030f3bdca1212208bf48fbae38d98fa33c50487e0b954f30dd46ab61dda49b16b31d9660b3b99b2
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.AmuletRules:AmuletRules
+Package:
+splice-amulet
+Acting Parties:
+87828d759448a98d3e16f77c23f9bb67::12205b73b361fe7af064d79399f6ab59fa0eadff9a5f15c436ff915225eac4b338ef
+
++1 more
+View Details
+#180
+Exercised
+Archive
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:180
+Copied
+Contract ID:
+0080ed7a805c25243342348fb4e8eb8f79fe79dade66da38650ff8881f015fe419ca121220171b2e87656ba7bfc3bbb152a2bace015ef4f600fc2c55909e09087c0432dd28
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:Amulet
+Package:
+splice-amulet
+Acting Parties:
+87828d759448a98d3e16f77c23f9bb67::12205b73b361fe7af064d79399f6ab59fa0eadff9a5f15c436ff915225eac4b338ef
+
++1 more
+View Details
+#181
+Created
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:181
+Copied
+Contract ID:
+002ac38909c2aacedd20ea8a6bbf8bf9dbd10739301de85869a44e49e256d93ce2ca12122075f34cd537d7093c06b313077a948446d41814008a182769b4072f2db6e69bc7
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:LockedAmulet
+Package:
+splice-amulet
+Signatories:
+87828d759448a98d3e16f77c23f9bb67::12205b73b361fe7af064d79399f6ab59fa0eadff9a5f15c436ff915225eac4b338ef
+
++1 more
+View Details
+#182
+Created
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:182
+Copied
+Contract ID:
+0046efc73d7241ed70f6d3e3d300ecc4930579664e4fc5c98b5ac05bdca295326cca121220d5e8b71c3d1a09ee3334b7286a9ed258f25b709f4ea6d929b9755a7f6d160bf7
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.AmuletAllocation:AmuletAllocation
+Package:
+splice-amulet
+Signatories:
+87828d759448a98d3e16f77c23f9bb67::12205b73b361fe7af064d79399f6ab59fa0eadff9a5f15c436ff915225eac4b338ef
+
++1 more
+Observers:
+temple-mainnet-1::1220f238bb79df3efbbac2ea964c3cd501003971a2cb59043e2dac50b06e85b8620f
+View Details
+#183
+Exercised
+EventType_Allocation_ExecuteTransfer
+2 Children
+root event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:183
+Copied
+Contract ID:
+0046efc73d7241ed70f6d3e3d300ecc4930579664e4fc5c98b5ac05bdca295326cca121220d5e8b71c3d1a09ee3334b7286a9ed258f25b709f4ea6d929b9755a7f6d160bf7
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.AmuletAllocation:AmuletAllocation
+Package:
+splice-amulet
+Acting Parties:
+87828d759448a98d3e16f77c23f9bb67::12205b73b361fe7af064d79399f6ab59fa0eadff9a5f15c436ff915225eac4b338ef
+
++2 more
+View Details
+#184
+Exercised
+EventType_LockedAmulet_Unlock
+1 Child
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:184
+Copied
+Contract ID:
+002ac38909c2aacedd20ea8a6bbf8bf9dbd10739301de85869a44e49e256d93ce2ca12122075f34cd537d7093c06b313077a948446d41814008a182769b4072f2db6e69bc7
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:LockedAmulet
+Package:
+splice-amulet
+Acting Parties:
+87828d759448a98d3e16f77c23f9bb67::12205b73b361fe7af064d79399f6ab59fa0eadff9a5f15c436ff915225eac4b338ef
+
++1 more
+View Details
+#185
+Created
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:185
+Copied
+Contract ID:
+009092f050b8221abfc82acec017c22dc622285c2be0a7b858b37895ea35e3cdb1ca121220dfae44fb720b7fc399438697dda4d3d493109f559c5bc9726a4bfa98ca4d8a44
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:Amulet
+Package:
+splice-amulet
+Signatories:
+87828d759448a98d3e16f77c23f9bb67::12205b73b361fe7af064d79399f6ab59fa0eadff9a5f15c436ff915225eac4b338ef
+
++1 more
+View Details
+#186
+Exercised
+EventType_AmuletRules_Transfer
+3 Children
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:186
+Copied
+Contract ID:
+00e168f53e5fccfa2ea0efebf70181545c311e93f7881fda3b290f49bdf030f3bdca1212208bf48fbae38d98fa33c50487e0b954f30dd46ab61dda49b16b31d9660b3b99b2
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.AmuletRules:AmuletRules
+Package:
+splice-amulet
+Acting Parties:
+87828d759448a98d3e16f77c23f9bb67::12205b73b361fe7af064d79399f6ab59fa0eadff9a5f15c436ff915225eac4b338ef
+
++2 more
+View Details
+#187
+Exercised
+Archive
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:187
+Copied
+Contract ID:
+009092f050b8221abfc82acec017c22dc622285c2be0a7b858b37895ea35e3cdb1ca121220dfae44fb720b7fc399438697dda4d3d493109f559c5bc9726a4bfa98ca4d8a44
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:Amulet
+Package:
+splice-amulet
+Acting Parties:
+87828d759448a98d3e16f77c23f9bb67::12205b73b361fe7af064d79399f6ab59fa0eadff9a5f15c436ff915225eac4b338ef
+
++1 more
+View Details
+#188
+Created
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:188
+Copied
+Contract ID:
+00fdbaa875f5561fb63b5978eb0c197e97c3bb0ee6e0025ba1fecd88e03ef71e8cca12122069a489e6c5a3be7ac617fd4fdc8de970c49956efabd5a6f27efa14eba48a16e8
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:AppRewardCoupon
+Package:
+splice-amulet
+Signatories:
+DSO::1220b1431ef217342db44d516bb9befde802be7d8899637d290895fa58880f19accc
+Observers:
+temple-mainnet-1::1220f238bb79df3efbbac2ea964c3cd501003971a2cb59043e2dac50b06e85b8620f
+View Details
+#189
+Created
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:189
+Copied
+Contract ID:
+0024dbd76e188b8ee3726a3984a11034ab7e765f45d3ad4a65c168a15e936b6f1aca1212206267eb33a73a77250e5e1f1585ce18b689771ab3fef762c620967f34bc26a614
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:Amulet
+Package:
+splice-amulet
+Signatories:
+DSO::1220b1431ef217342db44d516bb9befde802be7d8899637d290895fa58880f19accc
+
++1 more
+View Details
+#190
+Exercised
+EventType_FeaturedAppRight_CreateActivityMarker
+1 Child
+root event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:190
+Copied
+Contract ID:
+0012ec4c4b1fde3234437ea4e87f6e09f672ae5a9dd2ab2b93f19a65da1aafd8dbca111220efbebbc1ca3c63a0babbac1d566668d26117418670021cf2b9be29d24db0245e
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:FeaturedAppRight
+Package:
+splice-amulet
+Acting Parties:
+Bridge-Operator::1220c8448890a70e65f6906bd48d797ee6551f094e9e6a53e329fd5b2b549334f13f
+View Details
+#191
+Created
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:191
+Copied
+Contract ID:
+002662e8c21bdaeee6125d26afe9b92945260b148bf5ae79ac85c355fbd98575ddca1212209bec29c097469b0892ad4c8a8335944131259ad20fb1cb68c4fa7e89cae58df9
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:FeaturedAppActivityMarker
+Package:
+splice-amulet
+Signatories:
+DSO::1220b1431ef217342db44d516bb9befde802be7d8899637d290895fa58880f19accc
+Observers:
+Bridge-Operator::1220c8448890a70e65f6906bd48d797ee6551f094e9e6a53e329fd5b2b549334f13f
+View Details
+#192
+Exercised
+EventType_FeaturedAppRight_CreateActivityMarker
+1 Child
+root event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:192
+Copied
+Contract ID:
+001bac86a228f209faad6e7a4adf40cd17b8aa7605f166333d640ad3f0c172eeb6ca111220da4eb40ed3d6f4521dcacf25d027c02f4bd0b9c561bc17d76808d30239c75713
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:FeaturedAppRight
+Package:
+splice-amulet
+Acting Parties:
+temple-mainnet-1::1220f238bb79df3efbbac2ea964c3cd501003971a2cb59043e2dac50b06e85b8620f
+View Details
+#193
+Created
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:193
+Copied
+Contract ID:
+00ef60533931bdb9638b39097187467cc06dff0e0bca92e4ea21832dc9e60e0715ca121220c88d431f44d86bfef3c2fd4dce65b2fb256a43ddfd2c256087f4c796d51a0d25
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:FeaturedAppActivityMarker
+Package:
+splice-amulet
+Signatories:
+DSO::1220b1431ef217342db44d516bb9befde802be7d8899637d290895fa58880f19accc
+Observers:
+temple-mainnet-1::1220f238bb79df3efbbac2ea964c3cd501003971a2cb59043e2dac50b06e85b8620f
+View Details
+#194
+Exercised
+EventType_Allocation_Withdraw
+1 Child
+root event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:194
+Copied
+Contract ID:
+00bcad81b4daa12ed74a087960c378057f7d83ea3aa6ce3a3af6a0b661e5f99dcdca121220a3be1a31eeba93918a48a6be699b0409210026aecedcbef19ad888b1e7ab653a
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.AmuletAllocation:AmuletAllocation
+Package:
+splice-amulet
+Acting Parties:
+26e57297272630f6abb8bb713d6ee2bb::1220d184316b6da50438445fcf614c9b9c69f1ebadf50b965c641a446d253439cc73
+View Details
+#195
+Exercised
+EventType_LockedAmulet_Unlock
+1 Child
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:195
+Copied
+Contract ID:
+00cd43a5eb4afeb12b8569e1e886861c9a2e19b0101801e246cfd12471d48c346aca121220251613f53240dd2e949b86346aa5e6ac4f72812f91ba01cfb1eea396d3743db0
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:LockedAmulet
+Package:
+splice-amulet
+Acting Parties:
+26e57297272630f6abb8bb713d6ee2bb::1220d184316b6da50438445fcf614c9b9c69f1ebadf50b965c641a446d253439cc73
+
++1 more
+View Details
+#196
+Created
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:196
+Copied
+Contract ID:
+00e9176274d3927089bc30e2f2ceacf33f08fb66d502da4bdfa311c6d502a03031ca1212208b2ad64bd57d04a2212e0b2fbe00e837ac7ef752cacde64bf971c4650b6c365a
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:Amulet
+Package:
+splice-amulet
+Signatories:
+26e57297272630f6abb8bb713d6ee2bb::1220d184316b6da50438445fcf614c9b9c69f1ebadf50b965c641a446d253439cc73
+
++1 more
+View Details
+#197
+Exercised
+EventType_TransferFactory_Transfer
+1 Child
+root event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:197
+Copied
+Contract ID:
+004b73bef9a25d916efe93af46ed3808e2e486428e017b5718ba1c094d5f2424c6ca10122062968f770bf867cc90d77187118df923844f95b4e98fc1197acfdc09d956d8ce
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.ExternalPartyAmuletRules:ExternalPartyAmuletRules
+Package:
+splice-amulet
+Acting Parties:
+26e57297272630f6abb8bb713d6ee2bb::1220d184316b6da50438445fcf614c9b9c69f1ebadf50b965c641a446d253439cc73
+View Details
+#198
+Exercised
+EventType_AmuletRules_Transfer
+2 Children
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:198
+Copied
+Contract ID:
+00e168f53e5fccfa2ea0efebf70181545c311e93f7881fda3b290f49bdf030f3bdca1212208bf48fbae38d98fa33c50487e0b954f30dd46ab61dda49b16b31d9660b3b99b2
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.AmuletRules:AmuletRules
+Package:
+splice-amulet
+Acting Parties:
+26e57297272630f6abb8bb713d6ee2bb::1220d184316b6da50438445fcf614c9b9c69f1ebadf50b965c641a446d253439cc73
+View Details
+#199
+Exercised
+Archive
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:199
+Copied
+Contract ID:
+00e9176274d3927089bc30e2f2ceacf33f08fb66d502da4bdfa311c6d502a03031ca1212208b2ad64bd57d04a2212e0b2fbe00e837ac7ef752cacde64bf971c4650b6c365a
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:Amulet
+Package:
+splice-amulet
+Acting Parties:
+26e57297272630f6abb8bb713d6ee2bb::1220d184316b6da50438445fcf614c9b9c69f1ebadf50b965c641a446d253439cc73
+
++1 more
+View Details
+#200
+Created
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:200
+Copied
+Contract ID:
+0073a4ec9f78178f18e50ccfda380ca3053b82850cbefd208c77d83296e9c28e98ca121220786fc5e2061e54b2a53648b099ba0ad362885ee49b59c0713e1678445d04a13f
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:Amulet
+Package:
+splice-amulet
+Signatories:
+26e57297272630f6abb8bb713d6ee2bb::1220d184316b6da50438445fcf614c9b9c69f1ebadf50b965c641a446d253439cc73
+
++1 more
+View Details
+#201
+Exercised
+EventType_AllocationFactory_Allocate
+3 Children
+root event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:201
+Copied
+Contract ID:
+004b73bef9a25d916efe93af46ed3808e2e486428e017b5718ba1c094d5f2424c6ca10122062968f770bf867cc90d77187118df923844f95b4e98fc1197acfdc09d956d8ce
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.ExternalPartyAmuletRules:ExternalPartyAmuletRules
+Package:
+splice-amulet
+Acting Parties:
+26e57297272630f6abb8bb713d6ee2bb::1220d184316b6da50438445fcf614c9b9c69f1ebadf50b965c641a446d253439cc73
+View Details
+#202
+Exercised
+EventType_AmuletRules_ComputeFees
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:202
+Copied
+Contract ID:
+00e168f53e5fccfa2ea0efebf70181545c311e93f7881fda3b290f49bdf030f3bdca1212208bf48fbae38d98fa33c50487e0b954f30dd46ab61dda49b16b31d9660b3b99b2
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.AmuletRules:AmuletRules
+Package:
+splice-amulet
+Acting Parties:
+26e57297272630f6abb8bb713d6ee2bb::1220d184316b6da50438445fcf614c9b9c69f1ebadf50b965c641a446d253439cc73
+View Details
+#203
+Exercised
+EventType_AmuletRules_Transfer
+2 Children
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:203
+Copied
+Contract ID:
+00e168f53e5fccfa2ea0efebf70181545c311e93f7881fda3b290f49bdf030f3bdca1212208bf48fbae38d98fa33c50487e0b954f30dd46ab61dda49b16b31d9660b3b99b2
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.AmuletRules:AmuletRules
+Package:
+splice-amulet
+Acting Parties:
+26e57297272630f6abb8bb713d6ee2bb::1220d184316b6da50438445fcf614c9b9c69f1ebadf50b965c641a446d253439cc73
+
++1 more
+View Details
+#204
+Exercised
+Archive
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:204
+Copied
+Contract ID:
+0073a4ec9f78178f18e50ccfda380ca3053b82850cbefd208c77d83296e9c28e98ca121220786fc5e2061e54b2a53648b099ba0ad362885ee49b59c0713e1678445d04a13f
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:Amulet
+Package:
+splice-amulet
+Acting Parties:
+26e57297272630f6abb8bb713d6ee2bb::1220d184316b6da50438445fcf614c9b9c69f1ebadf50b965c641a446d253439cc73
+
++1 more
+View Details
+#205
+Created
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:205
+Copied
+Contract ID:
+00534c9622ae3c70c70f61515e3dcdab98fc6b78490e54f86977a35c403e8d1a65ca121220e4c8145f595d1012f872345ac30cf79845f8f41f244da4b69eb290b41b0a7163
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:LockedAmulet
+Package:
+splice-amulet
+Signatories:
+26e57297272630f6abb8bb713d6ee2bb::1220d184316b6da50438445fcf614c9b9c69f1ebadf50b965c641a446d253439cc73
+
++1 more
+View Details
+#206
+Created
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:206
+Copied
+Contract ID:
+006a3385f393f4f4237c6c907ffa14195b4524b80d1df1d3d92afe25f4b4541dd4ca12122055bc389c4cb9ca7266d3e3dfa1cd989108fae833974145b7597c6941cfbf80fc
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.AmuletAllocation:AmuletAllocation
+Package:
+splice-amulet
+Signatories:
+26e57297272630f6abb8bb713d6ee2bb::1220d184316b6da50438445fcf614c9b9c69f1ebadf50b965c641a446d253439cc73
+
++1 more
+Observers:
+temple-mainnet-1::1220f238bb79df3efbbac2ea964c3cd501003971a2cb59043e2dac50b06e85b8620f
+View Details
+#207
+Exercised
+EventType_Allocation_ExecuteTransfer
+2 Children
+root event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:207
+Copied
+Contract ID:
+006a3385f393f4f4237c6c907ffa14195b4524b80d1df1d3d92afe25f4b4541dd4ca12122055bc389c4cb9ca7266d3e3dfa1cd989108fae833974145b7597c6941cfbf80fc
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.AmuletAllocation:AmuletAllocation
+Package:
+splice-amulet
+Acting Parties:
+26e57297272630f6abb8bb713d6ee2bb::1220d184316b6da50438445fcf614c9b9c69f1ebadf50b965c641a446d253439cc73
+
++2 more
+View Details
+#208
+Exercised
+EventType_LockedAmulet_Unlock
+1 Child
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:208
+Copied
+Contract ID:
+00534c9622ae3c70c70f61515e3dcdab98fc6b78490e54f86977a35c403e8d1a65ca121220e4c8145f595d1012f872345ac30cf79845f8f41f244da4b69eb290b41b0a7163
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:LockedAmulet
+Package:
+splice-amulet
+Acting Parties:
+26e57297272630f6abb8bb713d6ee2bb::1220d184316b6da50438445fcf614c9b9c69f1ebadf50b965c641a446d253439cc73
+
++1 more
+View Details
+#209
+Created
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:209
+Copied
+Contract ID:
+00e983ed40a985166b59ff76c32040698b9600d34fa4de8a8579b490449bf2954dca121220d933fb093933289dfab9a97735ff3bc286b49ac578e76cf71daa8959f90da4b4
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:Amulet
+Package:
+splice-amulet
+Signatories:
+26e57297272630f6abb8bb713d6ee2bb::1220d184316b6da50438445fcf614c9b9c69f1ebadf50b965c641a446d253439cc73
+
++1 more
+View Details
+#210
+Exercised
+EventType_AmuletRules_Transfer
+3 Children
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:210
+Copied
+Contract ID:
+00e168f53e5fccfa2ea0efebf70181545c311e93f7881fda3b290f49bdf030f3bdca1212208bf48fbae38d98fa33c50487e0b954f30dd46ab61dda49b16b31d9660b3b99b2
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.AmuletRules:AmuletRules
+Package:
+splice-amulet
+Acting Parties:
+26e57297272630f6abb8bb713d6ee2bb::1220d184316b6da50438445fcf614c9b9c69f1ebadf50b965c641a446d253439cc73
+
++2 more
+View Details
+#211
+Exercised
+Archive
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:211
+Copied
+Contract ID:
+00e983ed40a985166b59ff76c32040698b9600d34fa4de8a8579b490449bf2954dca121220d933fb093933289dfab9a97735ff3bc286b49ac578e76cf71daa8959f90da4b4
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:Amulet
+Package:
+splice-amulet
+Acting Parties:
+26e57297272630f6abb8bb713d6ee2bb::1220d184316b6da50438445fcf614c9b9c69f1ebadf50b965c641a446d253439cc73
+
++1 more
+View Details
+#212
+Created
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:212
+Copied
+Contract ID:
+00080323c3e588a60bffaf823d8a255d816dd0a333af168564e8c719e73a73d67dca1212206087a4e268449d3ace1ad2d3b64c78284cd8ddcc9cb99f976a084ca4f552ea2b
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:AppRewardCoupon
+Package:
+splice-amulet
+Signatories:
+DSO::1220b1431ef217342db44d516bb9befde802be7d8899637d290895fa58880f19accc
+Observers:
+temple-mainnet-1::1220f238bb79df3efbbac2ea964c3cd501003971a2cb59043e2dac50b06e85b8620f
+View Details
+#213
+Created
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:213
+Copied
+Contract ID:
+0031146a701d2ca6de946db29d848bb9f83de176652f94c5a243dbb2f4a72f9c63ca12122070884671abc5e7ee9d22b295be44822b1eb73290b2b9b419d2e04026ea6b49b8
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:Amulet
+Package:
+splice-amulet
+Signatories:
+DSO::1220b1431ef217342db44d516bb9befde802be7d8899637d290895fa58880f19accc
+
++1 more
+View Details
+#214
+Exercised
+EventType_FeaturedAppRight_CreateActivityMarker
+1 Child
+root event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:214
+Copied
+Contract ID:
+0012ec4c4b1fde3234437ea4e87f6e09f672ae5a9dd2ab2b93f19a65da1aafd8dbca111220efbebbc1ca3c63a0babbac1d566668d26117418670021cf2b9be29d24db0245e
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:FeaturedAppRight
+Package:
+splice-amulet
+Acting Parties:
+Bridge-Operator::1220c8448890a70e65f6906bd48d797ee6551f094e9e6a53e329fd5b2b549334f13f
+View Details
+#215
+Created
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:215
+Copied
+Contract ID:
+0033da74dc7710726c8229950aeb6948f0dcd1e1b57775432e19ca32d4311bc98eca121220dbd8bf58c51971218417bed62d166ff1ad3abd73f25ae5a6a70d1251ff0f826a
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:FeaturedAppActivityMarker
+Package:
+splice-amulet
+Signatories:
+DSO::1220b1431ef217342db44d516bb9befde802be7d8899637d290895fa58880f19accc
+Observers:
+Bridge-Operator::1220c8448890a70e65f6906bd48d797ee6551f094e9e6a53e329fd5b2b549334f13f
+View Details
+#216
+Exercised
+EventType_FeaturedAppRight_CreateActivityMarker
+1 Child
+root event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:216
+Copied
+Contract ID:
+001bac86a228f209faad6e7a4adf40cd17b8aa7605f166333d640ad3f0c172eeb6ca111220da4eb40ed3d6f4521dcacf25d027c02f4bd0b9c561bc17d76808d30239c75713
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:FeaturedAppRight
+Package:
+splice-amulet
+Acting Parties:
+temple-mainnet-1::1220f238bb79df3efbbac2ea964c3cd501003971a2cb59043e2dac50b06e85b8620f
+View Details
+#217
+Created
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:217
+Copied
+Contract ID:
+001b39a345c87ee016879e7f1f7dba609425fad9aa64ec1a436212903105d06f0aca121220abd52d38274d8542b3edfd0978b68ff4ba9576d8173f1973835c55342c6eb8a9
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:FeaturedAppActivityMarker
+Package:
+splice-amulet
+Signatories:
+DSO::1220b1431ef217342db44d516bb9befde802be7d8899637d290895fa58880f19accc
+Observers:
+temple-mainnet-1::1220f238bb79df3efbbac2ea964c3cd501003971a2cb59043e2dac50b06e85b8620f
+View Details
+#218
+Exercised
+EventType_Allocation_Withdraw
+1 Child
+root event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:218
+Copied
+Contract ID:
+00c1aeb15148354ebe2db2d9e3579f7a75e34be17a42c608273dbe35d7bdf7d3acca121220af045789e283b8961045b39edc98543dd152920f5bd044852ecf0a7c049d7137
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.AmuletAllocation:AmuletAllocation
+Package:
+splice-amulet
+Acting Parties:
+0abdc5424637c362e7f4ac18d14af2b4::1220be37e84c6b57bfea7ced4ee29347384698687d7269554b797b420736d78f9fa7
+View Details
+#219
+Exercised
+EventType_LockedAmulet_Unlock
+1 Child
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:219
+Copied
+Contract ID:
+0099732dc2ff89573de827a8b19fc63ab08848c715e610c49c8737fe7c0200cfe4ca1212203a43b090830470ac16fb6279ca70789e60e901c9e8ffbdbc81e22f68e5f0d11e
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:LockedAmulet
+Package:
+splice-amulet
+Acting Parties:
+0abdc5424637c362e7f4ac18d14af2b4::1220be37e84c6b57bfea7ced4ee29347384698687d7269554b797b420736d78f9fa7
+
++1 more
+View Details
+#220
+Created
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:220
+Copied
+Contract ID:
+004baf089c9aa87b6a56043a68b04a31c8ea150863f2824eadcee04cff9bddbfbbca12122094a77d2d8a9b9008f1d71a5acd0bc44dc116b06c47f6fa5267da8d7a4ba2696a
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:Amulet
+Package:
+splice-amulet
+Signatories:
+0abdc5424637c362e7f4ac18d14af2b4::1220be37e84c6b57bfea7ced4ee29347384698687d7269554b797b420736d78f9fa7
+
++1 more
+View Details
+#221
+Exercised
+EventType_TransferFactory_Transfer
+1 Child
+root event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:221
+Copied
+Contract ID:
+004b73bef9a25d916efe93af46ed3808e2e486428e017b5718ba1c094d5f2424c6ca10122062968f770bf867cc90d77187118df923844f95b4e98fc1197acfdc09d956d8ce
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.ExternalPartyAmuletRules:ExternalPartyAmuletRules
+Package:
+splice-amulet
+Acting Parties:
+0abdc5424637c362e7f4ac18d14af2b4::1220be37e84c6b57bfea7ced4ee29347384698687d7269554b797b420736d78f9fa7
+View Details
+#222
+Exercised
+EventType_AmuletRules_Transfer
+2 Children
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:222
+Copied
+Contract ID:
+00e168f53e5fccfa2ea0efebf70181545c311e93f7881fda3b290f49bdf030f3bdca1212208bf48fbae38d98fa33c50487e0b954f30dd46ab61dda49b16b31d9660b3b99b2
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.AmuletRules:AmuletRules
+Package:
+splice-amulet
+Acting Parties:
+0abdc5424637c362e7f4ac18d14af2b4::1220be37e84c6b57bfea7ced4ee29347384698687d7269554b797b420736d78f9fa7
+View Details
+#223
+Exercised
+Archive
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:223
+Copied
+Contract ID:
+004baf089c9aa87b6a56043a68b04a31c8ea150863f2824eadcee04cff9bddbfbbca12122094a77d2d8a9b9008f1d71a5acd0bc44dc116b06c47f6fa5267da8d7a4ba2696a
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:Amulet
+Package:
+splice-amulet
+Acting Parties:
+0abdc5424637c362e7f4ac18d14af2b4::1220be37e84c6b57bfea7ced4ee29347384698687d7269554b797b420736d78f9fa7
+
++1 more
+View Details
+#224
+Created
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:224
+Copied
+Contract ID:
+00ed29154383513fa1807040bbe221597feccc34df99f1451d4d1dfadf24570d05ca121220d4ab17a5eaa4677645fb92031af66b0155ad3eab006f553c6ddaaca3f1dd2009
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:Amulet
+Package:
+splice-amulet
+Signatories:
+0abdc5424637c362e7f4ac18d14af2b4::1220be37e84c6b57bfea7ced4ee29347384698687d7269554b797b420736d78f9fa7
+
++1 more
+View Details
+#225
+Exercised
+EventType_AllocationFactory_Allocate
+3 Children
+root event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:225
+Copied
+Contract ID:
+004b73bef9a25d916efe93af46ed3808e2e486428e017b5718ba1c094d5f2424c6ca10122062968f770bf867cc90d77187118df923844f95b4e98fc1197acfdc09d956d8ce
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.ExternalPartyAmuletRules:ExternalPartyAmuletRules
+Package:
+splice-amulet
+Acting Parties:
+0abdc5424637c362e7f4ac18d14af2b4::1220be37e84c6b57bfea7ced4ee29347384698687d7269554b797b420736d78f9fa7
+View Details
+#226
+Exercised
+EventType_AmuletRules_ComputeFees
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:226
+Copied
+Contract ID:
+00e168f53e5fccfa2ea0efebf70181545c311e93f7881fda3b290f49bdf030f3bdca1212208bf48fbae38d98fa33c50487e0b954f30dd46ab61dda49b16b31d9660b3b99b2
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.AmuletRules:AmuletRules
+Package:
+splice-amulet
+Acting Parties:
+0abdc5424637c362e7f4ac18d14af2b4::1220be37e84c6b57bfea7ced4ee29347384698687d7269554b797b420736d78f9fa7
+View Details
+#227
+Exercised
+EventType_AmuletRules_Transfer
+2 Children
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:227
+Copied
+Contract ID:
+00e168f53e5fccfa2ea0efebf70181545c311e93f7881fda3b290f49bdf030f3bdca1212208bf48fbae38d98fa33c50487e0b954f30dd46ab61dda49b16b31d9660b3b99b2
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.AmuletRules:AmuletRules
+Package:
+splice-amulet
+Acting Parties:
+0abdc5424637c362e7f4ac18d14af2b4::1220be37e84c6b57bfea7ced4ee29347384698687d7269554b797b420736d78f9fa7
+
++1 more
+View Details
+#228
+Exercised
+Archive
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:228
+Copied
+Contract ID:
+00ed29154383513fa1807040bbe221597feccc34df99f1451d4d1dfadf24570d05ca121220d4ab17a5eaa4677645fb92031af66b0155ad3eab006f553c6ddaaca3f1dd2009
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:Amulet
+Package:
+splice-amulet
+Acting Parties:
+0abdc5424637c362e7f4ac18d14af2b4::1220be37e84c6b57bfea7ced4ee29347384698687d7269554b797b420736d78f9fa7
+
++1 more
+View Details
+#229
+Created
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:229
+Copied
+Contract ID:
+009e30e031f08fb3d7647db806de2d054f55511b013245086ac978da4682d23c06ca121220a71d58344a0fa383ce0dfdc717e04d020d36ae16bb6e4c7ec0aeadb5c2f86f90
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:LockedAmulet
+Package:
+splice-amulet
+Signatories:
+0abdc5424637c362e7f4ac18d14af2b4::1220be37e84c6b57bfea7ced4ee29347384698687d7269554b797b420736d78f9fa7
+
++1 more
+View Details
+#230
+Created
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:230
+Copied
+Contract ID:
+009ef1b466e6860d29ebf67357e184e10efb972469c7951b3ff489748310e64611ca121220aded84425736fc7339c7904e3bf63303db101c369f19a271ca7756f0b6682eb7
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.AmuletAllocation:AmuletAllocation
+Package:
+splice-amulet
+Signatories:
+0abdc5424637c362e7f4ac18d14af2b4::1220be37e84c6b57bfea7ced4ee29347384698687d7269554b797b420736d78f9fa7
+
++1 more
+Observers:
+temple-mainnet-1::1220f238bb79df3efbbac2ea964c3cd501003971a2cb59043e2dac50b06e85b8620f
+View Details
+#231
+Exercised
+EventType_Allocation_ExecuteTransfer
+2 Children
+root event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:231
+Copied
+Contract ID:
+009ef1b466e6860d29ebf67357e184e10efb972469c7951b3ff489748310e64611ca121220aded84425736fc7339c7904e3bf63303db101c369f19a271ca7756f0b6682eb7
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.AmuletAllocation:AmuletAllocation
+Package:
+splice-amulet
+Acting Parties:
+0abdc5424637c362e7f4ac18d14af2b4::1220be37e84c6b57bfea7ced4ee29347384698687d7269554b797b420736d78f9fa7
+
++2 more
+View Details
+#232
+Exercised
+EventType_LockedAmulet_Unlock
+1 Child
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:232
+Copied
+Contract ID:
+009e30e031f08fb3d7647db806de2d054f55511b013245086ac978da4682d23c06ca121220a71d58344a0fa383ce0dfdc717e04d020d36ae16bb6e4c7ec0aeadb5c2f86f90
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:LockedAmulet
+Package:
+splice-amulet
+Acting Parties:
+0abdc5424637c362e7f4ac18d14af2b4::1220be37e84c6b57bfea7ced4ee29347384698687d7269554b797b420736d78f9fa7
+
++1 more
+View Details
+#233
+Created
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:233
+Copied
+Contract ID:
+001acf2e7cb4f6c19b8c0985a058dbdf6b6e250c2bf0fbad079e38f37009f9c89fca1212208b10fd5e81b899166f1800de18ee375675766b0b9ad9450f538d18937328f43a
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:Amulet
+Package:
+splice-amulet
+Signatories:
+0abdc5424637c362e7f4ac18d14af2b4::1220be37e84c6b57bfea7ced4ee29347384698687d7269554b797b420736d78f9fa7
+
++1 more
+View Details
+#234
+Exercised
+EventType_AmuletRules_Transfer
+3 Children
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:234
+Copied
+Contract ID:
+00e168f53e5fccfa2ea0efebf70181545c311e93f7881fda3b290f49bdf030f3bdca1212208bf48fbae38d98fa33c50487e0b954f30dd46ab61dda49b16b31d9660b3b99b2
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.AmuletRules:AmuletRules
+Package:
+splice-amulet
+Acting Parties:
+0abdc5424637c362e7f4ac18d14af2b4::1220be37e84c6b57bfea7ced4ee29347384698687d7269554b797b420736d78f9fa7
+
++2 more
+View Details
+#235
+Exercised
+Archive
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:235
+Copied
+Contract ID:
+001acf2e7cb4f6c19b8c0985a058dbdf6b6e250c2bf0fbad079e38f37009f9c89fca1212208b10fd5e81b899166f1800de18ee375675766b0b9ad9450f538d18937328f43a
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:Amulet
+Package:
+splice-amulet
+Acting Parties:
+0abdc5424637c362e7f4ac18d14af2b4::1220be37e84c6b57bfea7ced4ee29347384698687d7269554b797b420736d78f9fa7
+
++1 more
+View Details
+#236
+Created
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:236
+Copied
+Contract ID:
+005251a06d33bbc52a4ed3e5b333453878ee6c38f1fd89dc4f565c6200924fc564ca121220032d0b710c419f5be13fb5d358d78a179fc05298f3ef7aa118555f2fbdf849c6
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:AppRewardCoupon
+Package:
+splice-amulet
+Signatories:
+DSO::1220b1431ef217342db44d516bb9befde802be7d8899637d290895fa58880f19accc
+Observers:
+temple-mainnet-1::1220f238bb79df3efbbac2ea964c3cd501003971a2cb59043e2dac50b06e85b8620f
+View Details
+#237
+Created
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:237
+Copied
+Contract ID:
+0095e7d4da3640ea178b028f01bce1ddec60f7a5397ea1e2cf89071e925ac13191ca1212208fc17eb83956e5e84b27e8e50014d2041e1cb5cbf564a560f44758a08b050750
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:Amulet
+Package:
+splice-amulet
+Signatories:
+DSO::1220b1431ef217342db44d516bb9befde802be7d8899637d290895fa58880f19accc
+
++1 more
+View Details
+#238
+Exercised
+EventType_FeaturedAppRight_CreateActivityMarker
+1 Child
+root event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:238
+Copied
+Contract ID:
+0012ec4c4b1fde3234437ea4e87f6e09f672ae5a9dd2ab2b93f19a65da1aafd8dbca111220efbebbc1ca3c63a0babbac1d566668d26117418670021cf2b9be29d24db0245e
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:FeaturedAppRight
+Package:
+splice-amulet
+Acting Parties:
+Bridge-Operator::1220c8448890a70e65f6906bd48d797ee6551f094e9e6a53e329fd5b2b549334f13f
+View Details
+#239
+Created
+child event
+Event ID:
+12200638594fa81c6b62bd0da0f2b3a3394429692eb853d14946372922557b098db0:239
+Copied
+Contract ID:
+004340177f9f59e886cd6dd98b41cc1615e7bd6628d079801a7dd1d9b5b79f870eca121220139b51bc43656d421d59d210fdb7b43689b3c05bc951337c8c3d2922a9fcea88
+Copied
+Template:
+3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:FeaturedAppActivityMarker
+Package:
+splice-amulet
+Signatories:
+DSO::1220b1431ef217342db44d516bb9befde802be7d8899637d290895fa58880f19accc
+Observers:
+Bridge-Operator::1220c8448890a70e65f6906bd48d797ee6551f094e9e6a53e329fd5b2b549334f13f
+View Details
+Explorer
+Featured Apps
+Activities
+
+Updates
+Transfers
+Offers
+Preapprovals
+Consensus
+
+Validators
+Super Validators
+Governance
+Tools
+
+Webhooks
+Api Documentation
+Batch Transfers
+
+Mainnet
+Terms & Conditions
+Privacy Policy
+©2026 CC View by PixelPlex. All Rights Reserved
+
+background image
+Cookie Notice
+We use cookies to enhance your browsing experience, analyze site traffic, and provide personalized content. Learn more
+
+Reject
+Accept
+
+
+
+
+work do after messsfge client give me this messge what should i reply this is client messsege:
+Hey guys, any update? It’s been almost 3 weeks now when we were given an impression that it’s almost done and just 1 days or work left.
+
+Frankly, we weren’t supposed to spend so much in advising or testing this. It was supposed to be done by you guys. Even this week, the locking and execution still isn’t happening. If it’s not visible on explorer, then it’s not the right approach.
+
+Let us know a clear timeline when will this be done.
