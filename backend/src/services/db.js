@@ -8,7 +8,7 @@
  * - Order reservations
  * - Stop-loss orders
  * - Auth sessions, challenges, refresh tokens
- * - Quota counters
+ * - Quota counterss
  */
 
 const { PrismaClient } = require('@prisma/client');
