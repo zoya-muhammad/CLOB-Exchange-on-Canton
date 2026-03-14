@@ -629,16 +629,16 @@ class OrderService {
     const timestamp = new Date().toISOString();
 
     // ═══════════════════════════════════════════════════════════════════
-    // TEMPLE PATTERN — Transaction 1: Self-transfer + Self-allocation
+    // OPERATOR-AS-RECEIVER — Transaction 1: Allocation (user signs)
     //
-    // Step 1: Self-transfer to create exact-amount holding
-    // Step 2: Self-allocation (sender = receiver = user, NOT executed)
-    // Purpose: Lock/reserve tokens for future settlement
+    // Allocation: sender=user, receiver=operator, executor=operator
+    // Purpose: Lock tokens; user consent embedded at creation.
     //
-    // Settlement (Transaction 2) will:
-    //   - Withdraw allocations
-    //   - Create new multi-leg allocation (2 transfer legs)
-    //   - Execute the new allocation
+    // Settlement (Transaction 2, app provider only):
+    //   - Execute allocations (executor-only)
+    //   - Create operator legs (base to buyer, quote to seller)
+    //   - Execute operator legs
+    // No withdraw, no ext-* submission at match time.
     // ═══════════════════════════════════════════════════════════════════
 
     const sdkClient = getCantonSDKClient();
@@ -658,8 +658,9 @@ class OrderService {
     console.log(`[OrderService]    Note: Self-transfer requires interactive signature but cannot be combined with allocation`);
     console.log(`[OrderService]    Using existing holdings for allocation (exact-amount optimization skipped)`);
 
-    // ═══ TEMPLE PATTERN STEP 2: Self-allocation (sender = receiver = user) ═══
-    console.log(`[OrderService] 🔄 Temple Pattern Step 2: Creating self-allocation (NOT executed)...`);
+    // ═══ OPERATOR-AS-RECEIVER: allocation sender=user, receiver=operator ═══
+    // User signs at order placement. At match, operator executes alone (no user sig).
+    console.log(`[OrderService] 🔄 Creating allocation (sender=user, receiver=operator, NOT executed)...`);
     const realAlloc = await sdkClient.tryBuildRealAllocationCommand(
       partyId,
       operatorPartyId,
@@ -678,7 +679,7 @@ class OrderService {
     disclosedContracts = realAlloc.disclosedContracts || [];
     synchronizerId = realAlloc.synchronizerId || config.canton.synchronizerId;
     allocationType = realAlloc.allocationType;
-    console.log(`[OrderService] ✅ Temple Pattern: Self-allocation prepared (sender = receiver = user, NOT executed) for ${orderId}`);
+    console.log(`[OrderService] ✅ Allocation prepared (sender=user, receiver=operator, NOT executed) for ${orderId}`);
 
     // Store the allocation type with the reservation
     await setAllocationContractIdForOrder(orderId, null, allocationType);

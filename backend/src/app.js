@@ -402,29 +402,6 @@ async function startServer() {
     console.log(`✅ Environment: ${config.server.env}`);
     console.log('');
 
-    // Store operator signing key from env (for post-settlement orphaned allocation cancel)
-    const operatorKey = process.env.OPERATOR_SIGNING_KEY_BASE64;
-    const operatorFingerprint = process.env.OPERATOR_PUBLIC_KEY_FINGERPRINT || '';
-    if (operatorKey) {
-      try {
-        const s = operatorKey.trim();
-        const keyBytes = /^[0-9a-fA-F]+$/.test(s) && s.length % 2 === 0
-          ? Buffer.from(s, 'hex') : Buffer.from(s, 'base64');
-        if (keyBytes.length !== 32 && keyBytes.length !== 64) {
-          console.warn(`⚠️  OPERATOR_SIGNING_KEY_BASE64 invalid: ${keyBytes.length} bytes (need 32 or 64). Skipping.`);
-        } else {
-          const userRegistry = require('./state/userRegistry');
-          const operatorPartyId = config.canton?.operatorPartyId || process.env.OPERATOR_PARTY_ID;
-          if (operatorPartyId) {
-            await userRegistry.storeSigningKey(operatorPartyId, operatorKey.trim(), operatorFingerprint);
-            console.log('✅ Operator signing key stored (post-settlement allocation cancel enabled)');
-          }
-        }
-      } catch (keyErr) {
-        console.warn('⚠️  Failed to store operator signing key:', keyErr.message);
-      }
-    }
-
     // Initialize Canton Wallet SDK (non-blocking)
     console.log('🔄 Initializing Canton Wallet SDK...');
     try {

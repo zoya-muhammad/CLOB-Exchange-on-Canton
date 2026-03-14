@@ -35,23 +35,6 @@ Detailed flow of activities from order placement through settlement.
 
 ---
 
-## 1.5 Post-Settlement: Orphaned Allocation Cleanup
-
-After settlement, some Splice deployments leave Allocation contracts active (orphaned).
-The backend attempts `Allocation_Cancel` to release them. This requires:
-- **Owner** (sender) signing key — stored during onboarding/rehydrate
-- **Executor** (operator) signing key — must be stored separately
-
-To fix "lock holding contract still visible after settlement":
-```bash
-# Store operator key (get from Canton participant config)
-OPERATOR_SIGNING_KEY_BASE64=<base64> OPERATOR_PUBLIC_KEY_FINGERPRINT=<hex> node scripts/store_operator_signing_key.js
-```
-
-Verify by checking holdings via the balance API.
-
----
-
 ## 2. Matching (Background — No User Action)
 
 ### 2.1 Polling
@@ -71,34 +54,25 @@ Verify by checking holdings via the balance API.
 
 ## 3. Settlement (Operator Only — No User Signature)
 
-### 3.1 Step 1: Execute Original Allocations
+### 3.1 Operator-as-Receiver Settlement (App Provider Only)
 
-**Seller allocation:**
-- `Allocation_ExecuteTransfer` on seller's allocation contract
-- Tokens move: **seller → operator** (base token, e.g. CC)
-- Allocation contract is **consumed/archived** — the lock is released
+Allocations at order placement use receiver=operator. At match, operator executes alone (no user signature).
 
-**Buyer allocation:**
-- `Allocation_ExecuteTransfer` on buyer's allocation contract  
-- Tokens move: **buyer → operator** (quote token, e.g. CBTC)
-- Allocation contract is **consumed/archived**
+1. **Execute** seller's allocation (seller to operator) — executor only
+2. **Execute** buyer's allocation (buyer to operator) — executor only
+3. **Create** allocation operator to buyer (base)
+4. **Create** allocation operator to seller (quote)
+5. **Execute** both operator legs
+6. For partial fills: return remaining base to seller, remaining quote to buyer
 
-### 3.2 Step 2: Standard Transfers (Operator → Counterparty)
+No withdraw, no ext-* submission. Operator-only at match time. No net locked holdings.
 
-**Leg A — Base to buyer:**
-- `TransferFactory_Transfer`: operator → buyer (base tokens)
-- Creates `TransferInstruction`; auto-accept service accepts on behalf of buyer
-
-**Leg B — Quote to seller:**
-- `TransferFactory_Transfer`: operator → seller (quote tokens)
-- Creates `TransferInstruction`; auto-accept service accepts on behalf of seller
-
-### 3.3 Step 3: Fill Orders
+### 3.2 Fill Orders
 - `FillOrder` exercised on both Order contracts
 - Updates filled quantity, remaining quantity
 - For partial fills: `newAllocationCid` can be null (current implementation)
 
-### 3.4 Step 4: Record Trade
+### 3.4 Record Trade
 - Trade record created in PostgreSQL
 - Trade contract created on Canton (for history)
 - Balance reservations released
@@ -123,20 +97,19 @@ Verify by checking holdings via the balance API.
 |-------|-----|------|
 | Place order | User (1 signature) | Allocation created + Order created |
 | Match | Backend | Find crossing orders |
-| Settle | Operator only | Execute allocations → Transfer to counterparty → FillOrder |
+| Settle | Operator only | Execute allocations, Create operator legs, Execute, FillOrder |
 | Cancel | User | CancelOrder + Allocation_Cancel |
 
 ---
 
 ## 6. Lock / Allocation Contract After Settlement
 
-**Expected:** When `Allocation_ExecuteTransfer` succeeds, the allocation contract (including its lock context) is **archived** — it should no longer appear as active.
+**Expected:** With operator-as-receiver settlement, executing allocations and operator legs transfers tokens directly with **no net locked holdings** in either party.
 
-**If you still see an active lock contract after settlement:**
+**If you still see an active lock holding contract after settlement:**
 
 1. **Order was never matched** — No crossing buy/sell order existed. The allocation stays active until the order is matched or cancelled.
-2. **Settlement failed** — Check backend logs for errors during `Allocation_ExecuteTransfer` or `performTransfer`.
-3. **Order ID mismatch** — Confirm the allocation is for the same order that was settled (check `order-1773249815108-9cf5a0d4` in logs).
-4. **Different contract type** — The Splice standard may have separate contracts (e.g. Lock vs Allocation). Ensure you're querying the same contract that was exercised.
+2. **Settlement failed** — Check backend logs for errors during multi-leg settlement (withdraw, create, or execute).
+3. **Order ID mismatch** — Confirm the allocation is for the same order that was settled (check order IDs in logs).
 
 **Verification:** Run `node verify_holdings.js` for the parties after a trade to confirm Holding contracts reflect the new balances.

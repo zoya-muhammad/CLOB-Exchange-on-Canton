@@ -1055,7 +1055,7 @@ class CantonSDKClient {
    * @param {string} orderId - Order ID for tracking (used in memo)
    * @returns {Object} { allocationContractId, result }
    */
-  async createAllocation(senderPartyId, receiverPartyId, amount, symbol, executorPartyId, orderId = '') {
+  async createAllocation(senderPartyId, receiverPartyId, amount, symbol, executorPartyId, orderId = '', options = {}) {
     if (!this.isReady()) {
       throw new Error('Canton SDK not initialized');
     }
@@ -1074,17 +1074,21 @@ class CantonSDKClient {
     const instrumentId = toCantonInstrument(symbol);
     const tokenSystemType = getTokenSystemType(symbol);
     const adminParty = this.getInstrumentAdminForSymbol(symbol);
+    const { settleWindowMsOverride } = options;
 
     console.log(`[CantonSDK] 📋 Creating Allocation: ${amount} ${symbol} (${instrumentId})`);
     console.log(`[CantonSDK]    Sender: ${senderPartyId.substring(0, 30)}...`);
     console.log(`[CantonSDK]    Receiver: ${receiverPartyId ? receiverPartyId.substring(0, 30) + '...' : 'TBD (set at match)'}`);
     console.log(`[CantonSDK]    Executor: ${executorPartyId.substring(0, 30)}...`);
+    if (settleWindowMsOverride) {
+      console.log(`[CantonSDK]    Operator leg: using short settle window ${settleWindowMsOverride / 1000}s (lock-expiry safe)`);
+    }
 
     // Route to correct API based on token system type
     if (tokenSystemType === 'utilities') {
-      return this._createUtilitiesAllocation(senderPartyId, receiverPartyId, amount, symbol, executorPartyId, orderId);
+      return this._createUtilitiesAllocation(senderPartyId, receiverPartyId, amount, symbol, executorPartyId, orderId, options);
     }
-    return this._createSpliceAllocation(senderPartyId, receiverPartyId, amount, symbol, executorPartyId, orderId);
+    return this._createSpliceAllocation(senderPartyId, receiverPartyId, amount, symbol, executorPartyId, orderId, options);
   }
 
   /**
@@ -1594,6 +1598,7 @@ class CantonSDKClient {
       adminParty, senderPartyId, receiverPartyId, executorPartyId,
       amount, instrumentId, orderId, holdingCids,
       choiceContextData, tokenSystemType = 'splice',
+      settleWindowMsOverride,
     } = params;
 
       const nowMs = Date.now();
@@ -1604,14 +1609,19 @@ class CantonSDKClient {
       // 5 min was too aggressive for a CLOB exchange — orders may wait several
       // minutes for a counterparty.  15 min balances safety with usability.
       // Utilities tokens (CBTC) are not round-bound, so 24h is safe.
+      // Operator legs: use short window (3 min) so settleBefore is before the
+      // LockedAmulet's lock expiry (tied to the original seller/buyer settleBefore).
       const defaultSettleWindowMs =
         tokenSystemType === 'utilities'
           ? 24 * 60 * 60 * 1000   // 24h
           : 15 * 60 * 1000;       // 15m — safe within Splice round bounds
       const configuredSettleWindowMs = Number(process.env.ALLOCATION_SETTLE_WINDOW_MS || defaultSettleWindowMs);
-      const settleWindowMs = Number.isFinite(configuredSettleWindowMs) && configuredSettleWindowMs > 60_000
+      const baseSettleWindowMs = Number.isFinite(configuredSettleWindowMs) && configuredSettleWindowMs > 60_000
         ? configuredSettleWindowMs
         : defaultSettleWindowMs;
+      const settleWindowMs = Number.isFinite(settleWindowMsOverride) && settleWindowMsOverride > 0
+        ? settleWindowMsOverride
+        : baseSettleWindowMs;
       const allocateWindowMs = Math.max(60_000, Math.min(5 * 60 * 1000, Math.floor(settleWindowMs / 2)));
       const allocateBefore = new Date(nowMs + allocateWindowMs).toISOString();
       const settleBefore = new Date(nowMs + settleWindowMs).toISOString();
@@ -1679,7 +1689,7 @@ class CantonSDKClient {
   /**
    * Create allocation for Splice tokens (CC/Amulet) via registry API.
    */
-  async _createSpliceAllocation(senderPartyId, receiverPartyId, amount, symbol, executorPartyId, orderId) {
+  async _createSpliceAllocation(senderPartyId, receiverPartyId, amount, symbol, executorPartyId, orderId, options = {}) {
     const instrumentId = toCantonInstrument(symbol);
     const adminParty = this.instrumentAdminPartyId;
 
@@ -1705,6 +1715,7 @@ class CantonSDKClient {
         amount, instrumentId, orderId, holdingCids,
         choiceContextData: null,
         tokenSystemType: 'splice',
+        settleWindowMsOverride: options.settleWindowMsOverride,
       });
 
       console.log(`[CantonSDK]    Calling Splice allocation-factory: ${allocationFactoryUrl}`);
@@ -1724,6 +1735,7 @@ class CantonSDKClient {
         amount, instrumentId, orderId, holdingCids,
         choiceContextData: factory.choiceContext?.choiceContextData,
         tokenSystemType: 'splice',
+        settleWindowMsOverride: options.settleWindowMsOverride,
       });
       const configModule = require('../config');
       const synchronizerId = this._pickSynchronizerIdFromDisclosed(
@@ -1756,7 +1768,7 @@ class CantonSDKClient {
   /**
    * Create allocation for Utilities tokens (CBTC) via Utilities Backend API.
    */
-  async _createUtilitiesAllocation(senderPartyId, receiverPartyId, amount, symbol, executorPartyId, orderId) {
+  async _createUtilitiesAllocation(senderPartyId, receiverPartyId, amount, symbol, executorPartyId, orderId, options = {}) {
     const instrumentId = toCantonInstrument(symbol);
     const adminParty = getInstrumentAdmin(symbol);
 
@@ -2511,7 +2523,7 @@ class CantonSDKClient {
 
         if (unsignedParties.length > 0) {
           console.warn(`[CantonSDK]    ⚠️ Missing signing keys for: ${unsignedParties.map(p => p.substring(0, 30) + '...').join(', ')}`);
-          console.warn(`[CantonSDK]    💡 To fix: store the operator's signing key via POST /api/onboarding/store-signing-key`);
+          console.warn(`[CantonSDK]    💡 To fix: ensure all actAs parties have signing keys stored via POST /api/onboarding/store-signing-key`);
     }
 
     const partySignatures = { signatures: partySignatureEntries };
@@ -2711,7 +2723,7 @@ class CantonSDKClient {
                 if (unsignedParties.length > 0) {
                   console.warn(`[CantonSDK]    ⚠️ Missing signing keys for: ${unsignedParties.map(p => p.substring(0, 30) + '...').join(', ')}`);
                   console.warn(`[CantonSDK]    ⚠️ Participant must auto-sign for these parties, or execute will fail`);
-                  console.warn(`[CantonSDK]    💡 To fix: store the operator's signing key via POST /api/onboarding/store-signing-key`);
+                  console.warn(`[CantonSDK]    💡 To fix: ensure all actAs parties have signing keys stored via POST /api/onboarding/store-signing-key`);
                 }
 
                 console.log(`[CantonSDK]    Collected ${partySignatureEntries.length} signature(s) for ${strategyActAs.length} actAs parties (${unsignedParties.length} unsigned)`);
@@ -2915,6 +2927,7 @@ class CantonSDKClient {
     }
 
     // Path 3: Direct exercise with synthetic expire-lock context
+    // AnyValue uses variant encoding: { tag: "AV_Text", value: "..." } per DAML-LF JSON spec
     try {
       const nowMs = Date.now();
       const expireLockIso = new Date(nowMs + 600_000).toISOString();
@@ -2931,7 +2944,7 @@ class CantonSDKClient {
           extraArgs: {
             context: {
               values: {
-                'expire-lock': { textValue: expireLockIso },
+                'expire-lock': { tag: 'AV_Text', value: expireLockIso },
               },
             },
             meta: { values: {} },
@@ -2947,171 +2960,6 @@ class CantonSDKClient {
     } catch (directErr) {
       console.error(`[CantonSDK]    Direct allocation withdraw failed: ${directErr.message}`);
       throw directErr;
-    }
-  }
-
-  /**
-   * Try to cancel an allocation that may still be active after settlement.
-   * Root cause fix: Allocation_ExecuteTransfer should archive the allocation, but
-   * some Splice deployments leave allocations active. This defensive step attempts
-   * Allocation_Cancel to release the lock.
-   *
-   * Strategy:
-   * 1. Executor-only (non-interactive) — works for internal parties
-   * 2. If DAML_AUTHORIZATION_ERROR and owner is external: interactive path with owner signing
-   *
-   * Safe to call: If allocation was archived by ExecuteTransfer, we get
-   * CONTRACT_NOT_FOUND and treat as success. If still active, Cancel archives it.
-   *
-   * @param {string} allocationContractId - The Allocation contract ID
-   * @param {string} executorPartyId - The exchange operator
-   * @param {string} symbol - Token symbol (CC, CBTC)
-   * @param {string} ownerPartyId - Owner (sender of allocation, for actAs + signing)
-   * @returns {Promise<{cancelled: boolean, reason?: string}>}
-   */
-  async tryCancelOrphanedAllocationAfterSettlement(allocationContractId, executorPartyId, symbol, ownerPartyId) {
-    if (!allocationContractId) return { cancelled: false, reason: 'NO_ALLOCATION_ID' };
-
-    const adminToken = await tokenProvider.getServiceToken();
-    const synchronizerId = await cantonService.resolveSubmissionSynchronizerId(
-      adminToken,
-      require('../config').canton.synchronizerId
-    );
-    const readAsParties = [...new Set([executorPartyId, ownerPartyId].filter(Boolean))];
-    const configRef = require('../config');
-    const operatorPartyId = configRef.canton.operatorPartyId;
-    const isExternalParty = (partyId) => typeof partyId === 'string' && partyId.startsWith('ext-');
-
-    try {
-      const registryUrl = CANTON_SDK_CONFIG.REGISTRY_API_URL;
-      const encodedCid = encodeURIComponent(allocationContractId);
-      const cancelContextUrl = `${registryUrl}/registry/allocations/v1/${encodedCid}/choice-contexts/cancel`;
-
-      const { data: context } = await getRegistryApi().post(cancelContextUrl, { excludeDebugFields: true }, {
-        headers: { Authorization: `Bearer ${adminToken}`, Accept: 'application/json' },
-      });
-
-      const ALLOCATION_INTERFACE = '#splice-api-token-allocation-v1:Splice.Api.Token.AllocationV1:Allocation';
-      const disclosedContracts = (context.disclosedContracts || []).map(dc => ({
-        templateId: dc.templateId,
-        contractId: dc.contractId,
-        createdEventBlob: dc.createdEventBlob,
-        synchronizerId: dc.synchronizerId || synchronizerId,
-      }));
-
-      // 1. Try executor-only first (works for internal parties)
-      try {
-        await cantonService.exerciseChoice({
-          token: adminToken,
-          actAsParty: [executorPartyId],
-          templateId: ALLOCATION_INTERFACE,
-          contractId: allocationContractId,
-          choice: 'Allocation_Cancel',
-          choiceArgument: {
-            extraArgs: {
-              context: context.choiceContextData || { values: {} },
-              meta: { values: {} },
-            },
-          },
-          readAs: readAsParties,
-          synchronizerId,
-          disclosedContracts,
-        });
-        console.log(`[CantonSDK] ✅ Orphaned allocation cancelled (executor-only): ${allocationContractId.substring(0, 24)}...`);
-        return { cancelled: true };
-      } catch (execErr) {
-        const execMsg = String(execErr?.message || execErr || '');
-        if (execMsg.includes('CONTRACT_NOT_FOUND') || execMsg.includes('could not be found') || execMsg.includes('404')) {
-          return { cancelled: false, reason: 'ALREADY_ARCHIVED' };
-        }
-        if (!execMsg.includes('DAML_AUTHORIZATION_ERROR') || !isExternalParty(ownerPartyId)) {
-          throw execErr;
-        }
-        console.log(`[CantonSDK]    Executor-only failed (auth) — trying interactive cancel with owner signing`);
-      }
-
-      // 2. Interactive path: actAs [owner, executor, operator] — ALL must sign.
-      const actAsParties = [...new Set([ownerPartyId, executorPartyId, operatorPartyId].filter(Boolean))];
-      const validParties = [];
-      const invalidParties = [];
-      for (const pid of actAsParties) {
-        const keyInfo = await userRegistry.getSigningKey(pid);
-        if (!keyInfo?.keyBase64) {
-          invalidParties.push({ party: pid, reason: 'no key stored' });
-          continue;
-        }
-        const decoded = decodePrivateKey(keyInfo.keyBase64);
-        if (decoded && decoded.length === 32) {
-          validParties.push(pid);
-        } else {
-          const len = Buffer.from(String(keyInfo.keyBase64).trim(), 'base64').length;
-          invalidParties.push({ party: pid, reason: `invalid key (${len} bytes, need 32/64)` });
-        }
-      }
-      if (validParties.length < actAsParties.length) {
-        const bad = invalidParties.map(({ party, reason }) => `${party.substring(0, 35)}... (${reason})`).join('; ');
-        console.warn(`[CantonSDK] ⚠️ Cannot interactive cancel — invalid/missing keys: ${bad}`);
-        console.warn(`[CantonSDK]    Owner: ensure frontend sends full Ed25519 private key (32 bytes) during rehydrate`);
-        console.warn(`[CantonSDK]    Operator: add OPERATOR_SIGNING_KEY_BASE64 (base64 or hex of 32-byte key) to .env`);
-        return { cancelled: false, reason: 'SIGNING_KEY_MISSING' };
-      }
-
-      const prepareResult = await cantonService.prepareInteractiveSubmission({
-        token: adminToken,
-        actAsParty: actAsParties,
-        templateId: ALLOCATION_INTERFACE,
-        contractId: allocationContractId,
-        choice: 'Allocation_Cancel',
-        choiceArgument: {
-          extraArgs: {
-            context: context.choiceContextData || { values: {} },
-            meta: { values: {} },
-          },
-        },
-        readAs: readAsParties,
-        synchronizerId,
-        disclosedContracts,
-      });
-
-      if (!prepareResult.preparedTransaction || !prepareResult.preparedTransactionHash) {
-        throw new Error('Prepare returned incomplete result for Allocation_Cancel');
-      }
-
-      const partySignatureEntries = [];
-      for (const partyId of actAsParties) {
-        const keyInfo = await userRegistry.getSigningKey(partyId);
-        if (!keyInfo) continue;
-        const signatureBase64 = await signHashWithKey(keyInfo.keyBase64, prepareResult.preparedTransactionHash);
-        partySignatureEntries.push({
-          party: partyId,
-          signatures: [{
-            format: 'SIGNATURE_FORMAT_RAW',
-            signature: signatureBase64,
-            signedBy: keyInfo.fingerprint,
-            signingAlgorithmSpec: 'SIGNING_ALGORITHM_SPEC_ED25519',
-          }],
-        });
-      }
-
-      if (partySignatureEntries.length === 0) {
-        throw new Error('SIGNING_KEY_MISSING: No signing keys for actAs parties');
-      }
-
-      await cantonService.executeInteractiveSubmission({
-        preparedTransaction: prepareResult.preparedTransaction,
-        partySignatures: { signatures: partySignatureEntries },
-        hashingSchemeVersion: prepareResult.hashingSchemeVersion,
-      }, adminToken);
-
-      console.log(`[CantonSDK] ✅ Orphaned allocation cancelled (interactive, owner signed): ${allocationContractId.substring(0, 24)}...`);
-      return { cancelled: true };
-    } catch (err) {
-      const msg = String(err?.message || err || '');
-      if (msg.includes('CONTRACT_NOT_FOUND') || msg.includes('could not be found') || msg.includes('404')) {
-        return { cancelled: false, reason: 'ALREADY_ARCHIVED' };
-      }
-      console.warn(`[CantonSDK] ⚠️ Post-settlement cancel attempt failed (non-fatal): ${msg.substring(0, 120)}`);
-      return { cancelled: false, reason: msg.substring(0, 80) };
     }
   }
 
@@ -3423,6 +3271,218 @@ class CantonSDKClient {
       const msg = String(err?.message || err || '');
       console.warn(`[CantonSDK] Allocation build failed for ${symbol}: ${msg.substring(0, 200)}`);
       return null;
+    }
+  }
+
+  /**
+   * Operator-as-receiver settlement (client requirement, mainnet-safe).
+   * Allocations at order placement use receiver=operator. At match:
+   * 1. Execute seller's allocation (seller to operator) — executor only
+   * 2. Execute buyer's allocation (buyer to operator) — executor only
+   * 3. Create and execute operator legs: base to buyer, quote to seller
+   * 4. For partial fills: return remaining base to seller, remaining quote to buyer
+   * No withdraw, no ext-* submission. Operator-only at match time.
+   *
+   * @param {Object} params - { sellAllocCid, buyAllocCid, sellerPartyId, buyerPartyId,
+   *   baseSymbol, quoteSymbol, matchQty, quoteAmount, operatorPartyId, tradeId,
+   *   remainingBaseSeller?, remainingQuoteBuyer? } (remaining for partial fills)
+   * @returns {Promise<{success: boolean, updateIds: Array, fallback?: string}>}
+   */
+  async executeOperatorAsReceiverSettlement(params) {
+    const {
+      sellAllocCid,
+      buyAllocCid,
+      sellerPartyId,
+      buyerPartyId,
+      baseSymbol,
+      quoteSymbol,
+      matchQty,
+      quoteAmount,
+      operatorPartyId,
+      tradeId,
+      remainingBaseSeller = '0',
+      remainingQuoteBuyer = '0',
+    } = params;
+
+    const matchQtyStr = String(matchQty);
+    const quoteAmountStr = String(quoteAmount);
+    const remainingBaseStr = String(remainingBaseSeller);
+    const remainingQuoteStr = String(remainingQuoteBuyer);
+
+    console.log(`[CantonSDK] Operator-as-receiver settlement: execute allocations, then operator legs`);
+    console.log(`[CantonSDK]    Match: ${matchQtyStr} ${baseSymbol}, ${quoteAmountStr} ${quoteSymbol}`);
+    if (remainingBaseStr !== '0' || remainingQuoteStr !== '0') {
+      console.log(`[CantonSDK]    Partial fill: remaining base to seller=${remainingBaseStr}, remaining quote to buyer=${remainingQuoteStr}`);
+    }
+
+    try {
+      // Step 1: Execute seller's allocation (seller to operator) — executor only
+      console.log(`[CantonSDK]    Step 1: Executing seller allocation (${baseSymbol})...`);
+      const sellExec = await this.tryRealAllocationExecution(
+        sellAllocCid, operatorPartyId, baseSymbol,
+        sellerPartyId, operatorPartyId  // owner=seller, receiver=operator
+      );
+      if (!sellExec) throw new Error('Failed to execute seller allocation');
+
+      // Step 2: Execute buyer's allocation (buyer to operator) — executor only
+      console.log(`[CantonSDK]    Step 2: Executing buyer allocation (${quoteSymbol})...`);
+      const buyExec = await this.tryRealAllocationExecution(
+        buyAllocCid, operatorPartyId, quoteSymbol,
+        buyerPartyId, operatorPartyId  // owner=buyer, receiver=operator
+      );
+      if (!buyExec) throw new Error('Failed to execute buyer allocation');
+
+      const updateIds = [];
+      const uid1 = sellExec?.transaction?.updateId || sellExec?.updateId;
+      const uid2 = buyExec?.transaction?.updateId || buyExec?.updateId;
+      if (uid1) updateIds.push({ step: 'sell-exec', updateId: uid1 });
+      if (uid2) updateIds.push({ step: 'buy-exec', updateId: uid2 });
+
+      // Step 3: operator to buyer (base)
+      // Splice (CC): use short settle window so settleBefore is before LockedAmulet lock expiry.
+      // Lock expires at original seller settleBefore (~15 min from order placement).
+      // Use 2 min to stay within lock for orders matching within ~13 min of placement.
+      const baseIsSplice = getTokenSystemType(baseSymbol) === 'splice';
+      const defaultOperatorLegSettleMs = 2 * 60 * 1000; // 2 min
+      const operatorLegSettleMs = Number(process.env.OPERATOR_LEG_SETTLE_WINDOW_MS || defaultOperatorLegSettleMs) || defaultOperatorLegSettleMs;
+      console.log(`[CantonSDK]    Step 3: Creating allocation operator to buyer (${matchQtyStr} ${baseSymbol})...`);
+      const sellLegResult = await this.createAllocation(
+        operatorPartyId, buyerPartyId, matchQtyStr, baseSymbol,
+        operatorPartyId, `${tradeId}-leg-sell`,
+        baseIsSplice ? { settleWindowMsOverride: operatorLegSettleMs } : {}
+      );
+      const sellLegAllocCid = sellLegResult?.allocationContractId;
+      if (!sellLegAllocCid) throw new Error('Failed to create operator to buyer allocation');
+      await this.tryRealAllocationExecution(sellLegAllocCid, operatorPartyId, baseSymbol, operatorPartyId, buyerPartyId);
+
+      // Step 4: operator to seller (quote)
+      console.log(`[CantonSDK]    Step 4: Creating allocation operator to seller (${quoteAmountStr} ${quoteSymbol})...`);
+      const buyLegResult = await this.createAllocation(
+        operatorPartyId, sellerPartyId, quoteAmountStr, quoteSymbol,
+        operatorPartyId, `${tradeId}-leg-buy`
+      );
+      const buyLegAllocCid = buyLegResult?.allocationContractId;
+      if (!buyLegAllocCid) throw new Error('Failed to create operator to seller allocation');
+      await this.tryRealAllocationExecution(buyLegAllocCid, operatorPartyId, quoteSymbol, operatorPartyId, sellerPartyId);
+
+      // Step 5: Partial fill — return remaining base to seller, remaining quote to buyer
+      if (remainingBaseStr !== '0' && parseFloat(remainingBaseStr) > 0) {
+        console.log(`[CantonSDK]    Step 5a: Returning remaining base to seller (${remainingBaseStr} ${baseSymbol})...`);
+        const remBaseResult = await this.createAllocation(
+          operatorPartyId, sellerPartyId, remainingBaseStr, baseSymbol,
+          operatorPartyId, `${tradeId}-leg-rem-base`,
+          baseIsSplice ? { settleWindowMsOverride: operatorLegSettleMs } : {}
+        );
+        if (remBaseResult?.allocationContractId) {
+          await this.tryRealAllocationExecution(remBaseResult.allocationContractId, operatorPartyId, baseSymbol, operatorPartyId, sellerPartyId);
+        }
+      }
+      if (remainingQuoteStr !== '0' && parseFloat(remainingQuoteStr) > 0) {
+        console.log(`[CantonSDK]    Step 5b: Returning remaining quote to buyer (${remainingQuoteStr} ${quoteSymbol})...`);
+        const remQuoteResult = await this.createAllocation(
+          operatorPartyId, buyerPartyId, remainingQuoteStr, quoteSymbol,
+          operatorPartyId, `${tradeId}-leg-rem-quote`
+        );
+        if (remQuoteResult?.allocationContractId) {
+          await this.tryRealAllocationExecution(remQuoteResult.allocationContractId, operatorPartyId, quoteSymbol, operatorPartyId, buyerPartyId);
+        }
+      }
+
+      console.log(`[CantonSDK] Operator-as-receiver settlement complete — no net locked holdings`);
+      return { success: true, updateIds };
+    } catch (err) {
+      const msg = String(err?.message || err || '');
+      console.warn(`[CantonSDK] Operator-as-receiver settlement failed: ${msg.substring(0, 150)}`);
+      return { success: false, updateIds: [], fallback: msg };
+    }
+  }
+
+  /**
+   * Execute multi-leg settlement per Splice TradingApp pattern.
+   * Withdraws existing allocations, creates new allocations with direct transfer legs
+   * (seller to buyer, buyer to seller), executes both. No net locked holdings.
+   * NOTE: Requires ext-* party submission for withdraw/create — fails with NO_SYNCHRONIZER.
+   * Use executeOperatorAsReceiverSettlement for mainnet (operator-only at match).
+   *
+   * @param {Object} params - { sellAllocCid, buyAllocCid, sellerPartyId, buyerPartyId,
+   *   baseSymbol, quoteSymbol, matchQty, quoteAmount, operatorPartyId, tradeId }
+   * @returns {Promise<{success: boolean, updateIds: Array, fallback?: string}>}
+   */
+  async executeMultiLegSettlement(params) {
+    const {
+      sellAllocCid,
+      buyAllocCid,
+      sellerPartyId,
+      buyerPartyId,
+      baseSymbol,
+      quoteSymbol,
+      matchQty,
+      quoteAmount,
+      operatorPartyId,
+      tradeId,
+    } = params;
+
+    const matchQtyStr = String(matchQty);
+    const quoteAmountStr = String(quoteAmount);
+    const adminToken = await tokenProvider.getServiceToken();
+
+    console.log(`[CantonSDK] 🔄 Multi-leg settlement: seller→buyer (${baseSymbol}), buyer→seller (${quoteSymbol})`);
+
+    try {
+      // Step 1: Withdraw both allocations (unlock tokens)
+      console.log(`[CantonSDK]    Step 1: Withdrawing allocations...`);
+      await this.withdrawAllocation(sellAllocCid, sellerPartyId, operatorPartyId, baseSymbol);
+      await this.withdrawAllocation(buyAllocCid, buyerPartyId, operatorPartyId, quoteSymbol);
+
+      // Step 2: Create allocation seller→buyer (base)
+      console.log(`[CantonSDK]    Step 2: Creating allocation seller→buyer (${matchQtyStr} ${baseSymbol})...`);
+      const sellLegResult = await this.createAllocation(
+        sellerPartyId,
+        buyerPartyId,  // receiver = buyer (direct leg)
+        matchQtyStr,
+        baseSymbol,
+        operatorPartyId,
+        `${tradeId}-leg-sell`
+      );
+      const sellLegAllocCid = sellLegResult?.allocationContractId;
+      if (!sellLegAllocCid) throw new Error('Failed to create seller→buyer allocation');
+
+      // Step 3: Create allocation buyer→seller (quote)
+      console.log(`[CantonSDK]    Step 3: Creating allocation buyer→seller (${quoteAmountStr} ${quoteSymbol})...`);
+      const buyLegResult = await this.createAllocation(
+        buyerPartyId,
+        sellerPartyId,  // receiver = seller (direct leg)
+        quoteAmountStr,
+        quoteSymbol,
+        operatorPartyId,
+        `${tradeId}-leg-buy`
+      );
+      const buyLegAllocCid = buyLegResult?.allocationContractId;
+      if (!buyLegAllocCid) throw new Error('Failed to create buyer→seller allocation');
+
+      // Step 4: Execute both allocations (executor-only, no net locked)
+      console.log(`[CantonSDK]    Step 4: Executing both allocations...`);
+      const sellerExec = await this.tryRealAllocationExecution(
+        sellLegAllocCid, operatorPartyId, baseSymbol,
+        sellerPartyId, buyerPartyId
+      );
+      const buyerExec = await this.tryRealAllocationExecution(
+        buyLegAllocCid, operatorPartyId, quoteSymbol,
+        buyerPartyId, sellerPartyId
+      );
+
+      const updateIds = [];
+      const uid1 = sellerExec?.transaction?.updateId || sellerExec?.updateId;
+      const uid2 = buyerExec?.transaction?.updateId || buyerExec?.updateId;
+      if (uid1) updateIds.push({ step: 'sell-leg-exec', updateId: uid1 });
+      if (uid2) updateIds.push({ step: 'buy-leg-exec', updateId: uid2 });
+
+      console.log(`[CantonSDK] ✅ Multi-leg settlement complete — no net locked holdings`);
+      return { success: true, updateIds };
+    } catch (err) {
+      const msg = String(err?.message || err || '');
+      console.warn(`[CantonSDK] Multi-leg settlement failed: ${msg.substring(0, 150)}`);
+      return { success: false, updateIds: [], fallback: msg };
     }
   }
 

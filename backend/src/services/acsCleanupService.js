@@ -31,8 +31,6 @@ const { getDb } = require('./db');
 const { getCantonSDKClient } = require('./canton-sdk-client');
 const { TOKEN_STANDARD_PACKAGE_ID } = require('../config/constants');
 
-const SPLICE_ALLOCATION_IFACE = '#splice-api-token-allocation-v1:Splice.Api.Token.AllocationV1:Allocation';
-
 // ─── Configuration ───────────────────────────────────────────────────────────
 const CLEANUP_INTERVAL_MS = parseInt(process.env.ACS_CLEANUP_INTERVAL_MS) || 5 * 60 * 1000; // 5 minutes
 const TRADE_RETENTION_MS = parseInt(process.env.TRADE_RETENTION_MS) || 24 * 60 * 60 * 1000;  // 24 hours
@@ -242,78 +240,11 @@ class ACSCleanupService {
       console.warn(`[ACSCleanup] Trade scan failed: ${err.message}`);
     }
 
-    // ═══ 4. Cancel orphaned Splice allocations (filled orders) ─══
-    // Root cause fix: Allocations for filled orders sometimes remain active.
-    // Attempt Allocation_Cancel to release the lock.
-    try {
-      const cancelled = await this._cancelOrphanedSpliceAllocations(token, operatorPartyId);
-      if (cancelled > 0) {
-        archivedThisCycle += cancelled;
-        this.stats.allocationsArchived += cancelled;
-        console.log(`[ACSCleanup] Cancelled ${cancelled} orphaned Splice allocation(s) for filled orders`);
-      }
-    } catch (err) {
-      console.warn(`[ACSCleanup] Orphaned allocation cleanup failed: ${err.message}`);
-    }
-
     this.stats.lastRunDuration = Date.now() - start;
 
     if (archivedThisCycle > 0) {
       console.log(`[ACSCleanup] Cycle complete: ${archivedThisCycle} contracts archived in ${this.stats.lastRunDuration}ms`);
     }
-  }
-
-  /**
-   * Cancel Splice allocations that reference filled orders (orphaned locks).
-   * @returns {Promise<number>} Number of allocations cancelled
-   */
-  async _cancelOrphanedSpliceAllocations(token, operatorPartyId) {
-    const db = getDb();
-    const sdkClient = getCantonSDKClient();
-    if (!sdkClient?.isReady?.()) return 0;
-
-    const settlements = await db.tradeSettlement.findMany({
-      select: { orderId: true },
-      where: { orderId: { not: null } },
-    });
-    const filledOrderIds = new Set(settlements.map(s => s.orderId).filter(Boolean));
-    if (filledOrderIds.size === 0) return 0;
-
-    const extractOrderRef = (payload) => {
-      if (!payload || typeof payload !== 'object') return null;
-      const p = payload;
-      return p?.orderId || p?.settlement?.settlementRef?.id || p?.allocation?.settlement?.settlementRef?.id
-        || p?.settlementRef?.id || p?.allocation?.settlementRef?.id || null;
-    };
-
-    const payloadIncludesOrderId = (payload, orderId) =>
-      payload && orderId && JSON.stringify(payload).includes(orderId);
-
-    const allocations = await cantonService.queryActiveContracts({
-      party: operatorPartyId,
-      templateIds: [SPLICE_ALLOCATION_IFACE],
-    }, token);
-
-    let cancelled = 0;
-    for (const a of Array.isArray(allocations) ? allocations : []) {
-      const payload = a.createArgument || a.payload || a.interfaceView || {};
-      let orderRef = extractOrderRef(payload);
-      if (!orderRef) {
-        for (const oid of filledOrderIds) {
-          if (payloadIncludesOrderId(payload, oid)) { orderRef = oid; break; }
-        }
-      }
-      if (!orderRef || !filledOrderIds.has(orderRef)) continue;
-
-      try {
-        const result = await sdkClient.tryCancelOrphanedAllocationAfterSettlement(
-          a.contractId, operatorPartyId, null, null
-        );
-        if (result.cancelled) cancelled++;
-      } catch (_) { /* non-fatal */ }
-      if (cancelled >= BATCH_SIZE) break;
-    }
-    return cancelled;
   }
 
   /**
