@@ -82,6 +82,8 @@ async function createPendingSettlement(match) {
 
 /**
  * Prepare withdraw for a party (seller or buyer). Returns prepared tx for frontend to sign.
+ * If allocation is already gone (CONTRACT_NOT_FOUND), marks withdrawal as done and throws
+ * so the UI can refresh and stop showing "Sign Withdraw" for that item.
  */
 async function prepareWithdraw(matchId, partyId, token) {
   const pending = await prisma.pendingSettlement.findUnique({ where: { id: matchId } });
@@ -94,14 +96,34 @@ async function prepareWithdraw(matchId, partyId, token) {
   const allocCid = isSeller ? pending.sellAllocCid : pending.buyAllocCid;
   const symbol = isSeller ? pending.baseSymbol : pending.quoteSymbol;
 
-  const sdkClient = getCantonSDKClient();
-  const prepareResult = await sdkClient.prepareWithdrawInteractive(allocCid, partyId, symbol, token);
+  try {
+    const sdkClient = getCantonSDKClient();
+    const prepareResult = await sdkClient.prepareWithdrawInteractive(allocCid, partyId, symbol, token);
 
-  return {
-    matchId,
-    role: isSeller ? 'seller' : 'buyer',
-    ...prepareResult,
-  };
+    return {
+      matchId,
+      role: isSeller ? 'seller' : 'buyer',
+      ...prepareResult,
+    };
+  } catch (err) {
+    const msg = String(err?.message || err || '');
+    const isContractNotFound = msg.includes('CONTRACT_NOT_FOUND') || msg.includes('could not be found');
+
+    if (isContractNotFound) {
+      // Allocation already consumed (withdrawn or executed) — sync DB so UI stops showing Sign Withdraw
+      console.log(`[TradingAppSettlement] Allocation ${allocCid?.substring(0, 24)}... already gone — marking ${isSeller ? 'seller' : 'buyer'} withdrawn`);
+      await prisma.pendingSettlement.update({
+        where: { id: matchId },
+        data: {
+          sellerWithdrawn: isSeller ? true : pending.sellerWithdrawn,
+          buyerWithdrawn: isBuyer ? true : pending.buyerWithdrawn,
+          status: (isSeller ? pending.buyerWithdrawn : pending.sellerWithdrawn) ? 'PENDING_MULTILEG' : 'PENDING_WITHDRAW',
+        },
+      });
+      throw new Error('ALREADY_WITHDRAWN: Allocation already withdrawn or settled. Refresh the list.');
+    }
+    throw err;
+  }
 }
 
 /**

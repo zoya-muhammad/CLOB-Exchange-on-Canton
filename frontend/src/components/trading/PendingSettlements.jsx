@@ -119,9 +119,9 @@ export default function PendingSettlements({ partyId, onSettlementComplete }) {
       });
     } catch (err) {
       const msg = err?.response?.data?.error ?? err?.message ?? 'Failed to prepare withdraw';
-      const isContractNotFound = msg.includes('CONTRACT_NOT_FOUND') || msg.includes('could not be found');
-      if (isContractNotFound) {
-        toast.error('Allocation already withdrawn or expired. Refreshing list…');
+      const isStale = msg.includes('CONTRACT_NOT_FOUND') || msg.includes('ALREADY_WITHDRAWN') || msg.includes('could not be found');
+      if (isStale) {
+        toast.success('Already withdrawn. List refreshed.');
         fetchPending();
       } else {
         toast.error(msg);
