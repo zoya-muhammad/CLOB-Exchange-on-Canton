@@ -42,7 +42,10 @@ router.post(
       return res.status(400).json({ error: 'partyId and token required' });
     }
     const result = await tradingAppSettlement.prepareWithdraw(matchId, partyId, token);
-    res.json(result);
+    if (result.alreadyWithdrawn) {
+      return res.json({ success: true, alreadyWithdrawn: true });
+    }
+    res.json(result.data);
   })
 );
 

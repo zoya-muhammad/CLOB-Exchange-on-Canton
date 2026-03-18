@@ -5,6 +5,12 @@
  * - Order placement: self-allocation (sender=receiver=user)
  * - Match: create PendingSettlement, both parties sign withdraw + multi-leg
  * - Tokens flow only between users (no operator custody)
+ *
+ * Architecture:
+ * - Ledger is source of truth for allocation state
+ * - DB (PendingSettlement) is reconciled when we observe ledger state
+ * - prepareWithdraw returns Result (no throw for expected allocation-gone case)
+ * - getPendingForParty reconciles stale entries at read time
  */
 
 const { PrismaClient } = require('@prisma/client');
@@ -14,6 +20,31 @@ const tokenProvider = require('./tokenProvider');
 const { getCantonSDKClient } = require('./canton-sdk-client');
 
 const prisma = new PrismaClient();
+
+/** True if error indicates allocation contract no longer exists (withdrawn/executed) */
+function isAllocationGoneError(err) {
+  if (!err) return false;
+  const code = err.code || '';
+  const msg = String(err?.message || err?.cause || err || '');
+  return (
+    code === 'CONTRACT_NOT_FOUND' ||
+    msg.includes('CONTRACT_NOT_FOUND') ||
+    msg.includes('could not be found') ||
+    msg.includes('not found')
+  );
+}
+
+/** Sync DB when allocation is gone — marks party's withdrawal done */
+async function syncAllocationGone(matchId, partyId, isSeller, pending) {
+  await prisma.pendingSettlement.update({
+    where: { id: matchId },
+    data: {
+      sellerWithdrawn: isSeller ? true : pending.sellerWithdrawn,
+      buyerWithdrawn: !isSeller ? true : pending.buyerWithdrawn,
+      status: (isSeller ? pending.buyerWithdrawn : pending.sellerWithdrawn) ? 'PENDING_MULTILEG' : 'PENDING_WITHDRAW',
+    },
+  });
+}
 
 /**
  * Create pending settlement when match occurs (TradingApp flow).
@@ -81,9 +112,9 @@ async function createPendingSettlement(match) {
 }
 
 /**
- * Prepare withdraw for a party (seller or buyer). Returns prepared tx for frontend to sign.
- * If allocation is already gone (CONTRACT_NOT_FOUND), marks withdrawal as done and throws
- * so the UI can refresh and stop showing "Sign Withdraw" for that item.
+ * Prepare withdraw for a party (seller or buyer).
+ * Returns { ok: true, data } with prepared tx, or { ok: true, alreadyWithdrawn: true } when allocation is gone.
+ * Never throws for expected allocation-gone case — syncs DB and returns structured result.
  */
 async function prepareWithdraw(matchId, partyId, token) {
   const pending = await prisma.pendingSettlement.findUnique({ where: { id: matchId } });
@@ -101,26 +132,18 @@ async function prepareWithdraw(matchId, partyId, token) {
     const prepareResult = await sdkClient.prepareWithdrawInteractive(allocCid, partyId, symbol, token);
 
     return {
-      matchId,
-      role: isSeller ? 'seller' : 'buyer',
-      ...prepareResult,
+      ok: true,
+      data: {
+        matchId,
+        role: isSeller ? 'seller' : 'buyer',
+        ...prepareResult,
+      },
     };
   } catch (err) {
-    const msg = String(err?.message || err || '');
-    const isContractNotFound = msg.includes('CONTRACT_NOT_FOUND') || msg.includes('could not be found');
-
-    if (isContractNotFound) {
-      // Allocation already consumed (withdrawn or executed) — sync DB so UI stops showing Sign Withdraw
-      console.log(`[TradingAppSettlement] Allocation ${allocCid?.substring(0, 24)}... already gone — marking ${isSeller ? 'seller' : 'buyer'} withdrawn`);
-      await prisma.pendingSettlement.update({
-        where: { id: matchId },
-        data: {
-          sellerWithdrawn: isSeller ? true : pending.sellerWithdrawn,
-          buyerWithdrawn: isBuyer ? true : pending.buyerWithdrawn,
-          status: (isSeller ? pending.buyerWithdrawn : pending.sellerWithdrawn) ? 'PENDING_MULTILEG' : 'PENDING_WITHDRAW',
-        },
-      });
-      throw new Error('ALREADY_WITHDRAWN: Allocation already withdrawn or settled. Refresh the list.');
+    if (isAllocationGoneError(err)) {
+      console.log(`[TradingAppSettlement] Allocation ${allocCid?.substring(0, 24)}... gone — reconciling DB`);
+      await syncAllocationGone(matchId, partyId, isSeller, pending);
+      return { ok: true, alreadyWithdrawn: true };
     }
     throw err;
   }
@@ -460,6 +483,7 @@ async function finalizeSettlement(matchId) {
 
 /**
  * Get pending settlements for a party.
+ * Returns only entries that require action (status PENDING_WITHDRAW or PENDING_MULTILEG).
  */
 async function getPendingForParty(partyId) {
   return prisma.pendingSettlement.findMany({

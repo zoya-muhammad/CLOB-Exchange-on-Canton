@@ -111,6 +111,11 @@ export default function PendingSettlements({ partyId, onSettlementComplete }) {
         },
       });
       const data = res?.data ?? res;
+      if (data?.alreadyWithdrawn) {
+        toast.success('Already withdrawn. List refreshed.');
+        fetchPending();
+        return;
+      }
       setWithdrawSigning({
         pending: p,
         preparedTransaction: data.preparedTransaction,
